@@ -1,77 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microprocesador MIPS</title>
-    <link rel="stylesheet" href="estilos.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipo 67 MIPS 101</title>
+  <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
 
-    <header>
-        <h1>Explicacion Micro MIPS</h1>
-        <p>Analisis del Datapath y Formatos de Instruccion</p>
-        <p>Proyecto Arquitectura de Computadoras</p>
-        <p>Nombres</p>
-    </header>
+  <nav class="navbar">
+    <a href="index.html">
+    <div class="logo">MIPS32 CPU</div>
+  </a>
+    <ul>
+      <li><a href="instrucciones.html">Instrucciones & Simulación</a></li>
+      <li><a href="arquitectura.html"> Arquitectura </a></li>
+    </ul>
+  </nav>
 
-    <div class="contenedor">
-        
-        <div class="tarjeta">
-            <h2>Como funciona el Datapath?</h2>
-            <p>El datapath de este microprocesador MIPS de un solo ciclo coordina el flujo de datos y señales de control para ejecutar instrucciones en un pulso de reloj[cite: 1]. El proceso general sigue esta secuencia[cite: 1]:</p>
-<ul>
-    <li><strong>Búsqueda (Fetch):</strong> El PC (Contador de Programa) indica la dirección actual para extraer la instrucción desde la <em>Memoria de Instrucciones</em>[cite: 1].</li>
-    <li><strong>Decodificación:</strong> Los primeros 6 bits (op) entran a la <em>Unidad de Control</em>, la cual genera las señales que configuran los multiplexores (Mux), la memoria y la ALU[cite: 1]. Simultáneamente, se leen los operandos desde el <em>Banco de Registros</em>[cite: 1].</li>
-    <li><strong>Ejecución y Memoria:</strong> La <em>ALU</em> realiza operaciones aritméticas o lógicas, o calcula direcciones de memoria dependiendo del tipo de instrucción[cite: 1]. Si es necesario, se accede a la <em>Memoria de Datos</em> para leer o escribir[cite: 1].</li>
-    <li><strong>Escritura (Write-Back):</strong> El resultado final, ya sea de la ALU o de la Memoria de Datos, se envía de regreso para guardarse en el <em>Banco de Registros</em>[cite: 1].</li>
-</ul>
+  <div class="container">
+    <section class="hero">
+      <h1>Microprocesador MIPS de 32 Bits</h1>
+      <p>Reporte de Proyecto Final | Arquitectura de Computadoras</p>
+    </section>
+
+    <section class="card-section">
+      <h2>📌 Sobre el Proyecto</h2>
+      <p>Este proyecto documenta el diseño, la construcción y la simulación de una arquitectura de procesador de 32 bits basada en el juego de instrucciones MIPS. El microprocesador es capaz de procesar instrucciones de tipo R (aritmético-lógicas), tipo I (acceso a memoria) y tipo J (saltos incondicionales).</p>
+    </section>
+
+    <section class="card-section">
+      <h2>📜 Historia Corta de MIPS</h2>
+      <p>La arquitectura <strong>MIPS</strong> (Microprocessor without Interlocked Pipelined Stages) fue desarrollada en la Universidad de Stanford en 1981 por un equipo liderado por John L. Hennessy. Fue pionera en la filosofía <strong>RISC</strong> (Reduced Instruction Set Computer), priorizando un conjunto reducido de instrucciones de longitud fija (32 bits) para lograr una ejecución de ciclo rápido y eficiente.</p>
+    </section>
+
+    <section class="card-section text-center">
+        <h2>Instrucciones y simulación </h2>
+        <p>Aquí se pueden encontrar las instrucciones soportadas por el procesador MIPS y su simulación en JavaScript.</p>
+        <div class="btn-container">
+        <a href="instrucciones.html" class="btn-primary">Explorar Instrucciones ➔</a>
         </div>
+    </section>
 
-        <!-- Instrucciones Tipo R -->
-        <div class="tarjeta">
-            <a href="TipoR.html">
-            <h2>Instrucciones Tipo R (Registro)</h2>
-            </a>
-            <p>Las instrucciones Tipo R operan exclusivamente con registros. 
-                El diagrama muestra como los campos <strong>rs</strong> y <strong>rt</strong> 
-                van al Banco de Registros para ser leidos, pasan por la ALU para la operacion, 
-                y el resultado regresa al registro destino <strong>rd</strong>.</p>
-
-                    <a href="TipoR.html">
-                    <img src="Imagenes/TipoR.png" class="imagen-instruccion">
-                    </a>
+        <section class="card-section text-center">
+        <h2> Arquitectura </h2>
+        <p>Aquí se pueden encontrar los tres tipos de arquitectura de MIPS .</p>
+        <div class="btn-container">
+        <a href="arquitectura.html" class="btn-primary">Explorar Arquitectura ➔</a>
         </div>
-
-        <!-- Instrucciones Tipo I -->
-        <div class="tarjeta">
-            <a href="TipoI.html">
-            <h2>Instrucciones Tipo I (Inmediato)</h2>
-            </a>
-            <p>En el Tipo I se utiliza un valor constante de 16 bits en lugar 
-                de un tercer registro. Este valor pasa por la extension de signo (Sign Ext) 
-                para convertirse en 32 bits antes de entrar a la ALU o calcular direcciones de memoria.</p>
-
-                    <a href="TipoI.html">
-                    <img src="Imagenes/TipoI.png" class="imagen-instruccion" alt="Ruta de datos Tipo I">
-                    </a>
-        </div>
-
-        <!-- Instrucciones Tipo J -->
-        <div class="tarjeta">
-            <a href="TipoJ.html">
-            <h2>Instrucciones Tipo J (Salto)</h2>
-            </a>
-            <p>Las instrucciones Tipo J sirven para saltos incondicionales. 
-                Utilizan un indice de 26 bits que, tras un corrimiento a la izquierda (Shift Left), 
-                calcula directamente la nueva direccion a la que debe saltar el PC.</p>
-
-                    <a href="TipoJ.html">
-                    <img src="Imagenes/TipoJ.png" class="imagen-instruccion" alt="Ruta de datos Tipo J">
-                    </a>
-        </div>
-
-    </div>
+    </section>
+    
+  </div>
 
 </body>
 </html>

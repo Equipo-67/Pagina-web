@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instrucciones & Simulación - MIPS32</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html">
+    <div class="logo">MIPS32 CPU</div>
+    </a> 
+    <ul>
+      <li><a href="instrucciones.html" class="active">Instrucciones & Simulación</a></li>
+      <li><a href="arquitectura.html">Arquitectura</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2>Conjunto de Instrucciones Soportadas</h2>
+    <p style="margin-bottom: 1.5rem;">Haz clic en cualquier tarjeta para desplegar su descripción teórica y ejecutar la simulación en JavaScript.</p>
+
+    <!-- ADD -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>ADD - Suma Aritmética</span>
+        <span class="badge">Tipo R</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rd] = R[rs] + R[rt]</p>
+        <p>Suma los valores de los registros <code>$rs</code> y <code>$rt</code> y almacena el resultado en <code>$rd</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="add-rs" value="10"></label>
+            <label>$rt: <input type="number" id="add-rt" value="15"></label>
+            <button class="btn-sim" onclick="runADD()">Ejecutar ADD</button>
+          </div>
+          <div class="result-box" id="add-res">Resultado $rd: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>SUB - Resta Aritmética</span>
+        <span class="badge">Tipo R</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rd] = R[rs] - R[rt]</p>
+        <p>Resta el contenido del registro <code>$rt</code> al registro <code>$rs</code> y guarda el resultado en <code>$rd</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="sub-rs" value="50"></label>
+            <label>$rt: <input type="number" id="sub-rt" value="20"></label>
+            <button class="btn-sim" onclick="runSUB()">Ejecutar SUB</button>
+          </div>
+          <div class="result-box" id="sub-res">Resultado $rd: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AND -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>AND - Operación Lógica Y</span>
+        <span class="badge">Tipo R</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rd] = R[rs] &amp; R[rt]</p>
+        <p>Realiza una operación AND bit a bit entre <code>$rs</code> y <code>$rt</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="and-rs" value="12"></label>
+            <label>$rt: <input type="number" id="and-rt" value="10"></label>
+            <button class="btn-sim" onclick="runAND()">Ejecutar AND</button>
+          </div>
+          <div class="result-box" id="and-res">Resultado $rd: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OR -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>OR - Operación Lógica O</span>
+        <span class="badge">Tipo R</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rd] = R[rs] | R[rt]</p>
+        <p>Realiza una operación OR bit a bit entre <code>$rs</code> y <code>$rt</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="or-rs" value="12"></label>
+            <label>$rt: <input type="number" id="or-rt" value="5"></label>
+            <button class="btn-sim" onclick="runOR()">Ejecutar OR</button>
+          </div>
+          <div class="result-box" id="or-res">Resultado $rd: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLT -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>SLT - Set on Less Than</span>
+        <span class="badge">Tipo R</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rd] = (R[rs] &lt; R[rt]) ? 1 : 0</p>
+        <p>Si el valor de <code>$rs</code> es menor que el de <code>$rt</code>, escribe 1 en <code>$rd</code>; de lo contrario escribe 0.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="slt-rs" value="4"></label>
+            <label>$rt: <input type="number" id="slt-rt" value="8"></label>
+            <button class="btn-sim" onclick="runSLT()">Ejecutar SLT</button>
+          </div>
+          <div class="result-box" id="slt-res">Resultado $rd: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SW & LW (Memoria) -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>SW / LW - Acceso a Memoria (Store / Load Word)</span>
+        <span class="badge">Tipo I</span>
+      </div>
+      <div class="card-body">
+        <p><strong>SW:</strong> Guarda el valor de un registro en la memoria de datos.</p>
+        <p><strong>LW:</strong> Lee un valor de la memoria de datos y lo carga en un registro.</p>
+        <div class="demo-box">
+          <h4> Simulación de Memoria:</h4>
+          <div class="inputs-group">
+            <label>Valor a Guardar: <input type="number" id="mem-val" value="99"></label>
+            <label>Dirección RAM: <input type="number" id="mem-addr" value="4"></label>
+            <button class="btn-sim" onclick="runSW()">Ejecutar SW (Escribir RAM)</button>
+            <button class="btn-sim" style="background:#6366f1" onclick="runLW()">Ejecutar LW (Leer RAM)</button>
+          </div>
+          <div class="result-box" id="mem-res">Estado RAM: [Dirección 4: 0]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JUMP -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>J - Jump (Salto Incondicional)</span>
+        <span class="badge">Tipo J</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Operación:</strong> PC = Target Address</p>
+        <p>Actualiza de forma incondicional el Contador de Programa (PC) a la dirección especificada en la instrucción.</p>
+        <div class="demo-box">
+          <h4> Simulación de PC:</h4>
+          <div class="inputs-group">
+            <label>PC Actual: <input type="number" id="pc-curr" value="100" readonly></label>
+            <label>Dirección Salto: <input type="number" id="pc-target" value="400"></label>
+            <button class="btn-sim" onclick="runJUMP()">Ejecutar J</button>
+          </div>
+          <div class="result-box" id="j-res">Nuevo PC: 100</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Control visual de despliegue
+   function toggleCard(headerEl) {
+  // Alterna la clase morada en el encabezado
+  headerEl.classList.toggle('active');
+  
+  // Alterna la animación de apertura en el cuerpo
+  const body = headerEl.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+    // --- LÓGICA DE SIMULACIÓN EN JS ---
+    function runADD() {
+      const rs = Number(document.getElementById('add-rs').value);
+      const rt = Number(document.getElementById('add-rt').value);
+      document.getElementById('add-res').innerText = `Resultado $rd: ${rs + rt}`;
+    }
+
+    function runSUB() {
+      const rs = Number(document.getElementById('sub-rs').value);
+      const rt = Number(document.getElementById('sub-rt').value);
+      document.getElementById('sub-res').innerText = `Resultado $rd: ${rs - rt}`;
+    }
+
+    function runAND() {
+      const rs = Number(document.getElementById('and-rs').value);
+      const rt = Number(document.getElementById('and-rt').value);
+      const res = rs & rt;
+      document.getElementById('and-res').innerText = `Resultado $rd: ${res} (Binario: ${(res >>> 0).toString(2).padStart(8, '0')})`;
+    }
+
+    function runOR() {
+      const rs = Number(document.getElementById('or-rs').value);
+      const rt = Number(document.getElementById('or-rt').value);
+      const res = rs | rt;
+      document.getElementById('or-res').innerText = `Resultado $rd: ${res} (Binario: ${(res >>> 0).toString(2).padStart(8, '0')})`;
+    }
+
+    function runSLT() {
+      const rs = Number(document.getElementById('slt-rs').value);
+      const rt = Number(document.getElementById('slt-rt').value);
+      const res = rs < rt ? 1 : 0;
+      document.getElementById('slt-res').innerText = `Resultado $rd: ${res} (${rs} < ${rt})`;
+    }
+
+    // Objeto simulado de Memoria RAM
+    const memory = {};
+    function runSW() {
+      const val = Number(document.getElementById('mem-val').value);
+      const addr = Number(document.getElementById('mem-addr').value);
+      memory[addr] = val;
+      document.getElementById('mem-res').innerText = `SW Exitoso: Dirección RAM[${addr}] = ${val}`;
+    }
+
+    function runLW() {
+      const addr = Number(document.getElementById('mem-addr').value);
+      const val = memory[addr] !== undefined ? memory[addr] : 0;
+      document.getElementById('mem-res').innerText = `LW Exitoso: Se leyó el valor ${val} desde RAM[${addr}]`;
+    }
+
+    function runJUMP() {
+      const target = Number(document.getElementById('pc-target').value);
+      document.getElementById('pc-curr').value = target;
+      document.getElementById('j-res').innerText = `¡Salto realizado! El nuevo Contador de Programa (PC) es ${target}`;
+    }
+  </script>
+</body>
+</html>

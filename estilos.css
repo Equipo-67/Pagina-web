@@ -1,102 +1,303 @@
-/* Estilos generales */
+/* --- RESET & VARIABLES GLOBALES --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
-    margin: 0;
-    padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: #f4f7f6;
+  color: #334155;
+  line-height: 1.6;
+}
+/* Centrado para secciones o tarjetas específicas */
+.text-center {
+  text-align: center;
 }
 
-header {
-    background-color: #0056b3;
-    color: white;
-    padding: 30px 20px;
-    text-align: center;
+/* Contenedor para centrar el botón */
+.btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
 }
 
-.contenedor {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 0 20px;
+/* Quita el subrayado del enlace del logo */
+.navbar a {
+  text-decoration: none;
 }
 
-/* Diseño de las cajas (tarjetas) */
-.tarjeta {
-    background: white;
-    padding: 25px;
-    margin-bottom: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.navbar .logo {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
-.tarjeta h2 {
-    color: #0056b3;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-top: 0;
+/* Efecto al pasar el cursor sobre el logo */
+.navbar a:hover .logo {
+  opacity: 0.85;
 }
 
-.tarjeta p {
-    line-height: 1.6;
+/* --- NAVEGACIÓN --- */
+.navbar {
+  background-color: #1e293b;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Clase para las imágenes que agregarás después */
-.imagen-instruccion {
-    width: 100%;
-    max-width: 600px;
-    display: block;
-    margin: 15px auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.navbar .logo {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: bold;
 }
-        .panel-control {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .panel-control input, .panel-control select {
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 80px;
-        }
-        .btn-ejecutar {
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-ejecutar:hover {
-            background-color: #004494;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #0056b3;
-            color: white;
-        }
-        .texto-flujo {
-            background-color: #e3f2fd;
-            padding: 15px;
-            border-left: 5px solid #0056b3;
-            margin-top: 20px;
-            font-size: 1.1em;
-        }
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.navbar a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar a:hover, .navbar a.active {
+  color: #38bdf8;
+}
+
+/* --- CONTENEDORES & MAQUETACIÓN --- */
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.hero {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.hero h1 {
+  color: #0f172a;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.card-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.card-section h2 {
+  color: #1e293b;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+/* --- TARJETAS DESPLEGABLES (ACORDEÓN) --- */
+.instruction-card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.card-header {
+  background: #2563eb; /* Azul original */
+  color: white;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  transition: background-color 0.3s ease; /* Transición para el cambio de color */
+}
+
+.card-header.active {
+  background-color: #7c3aed; /* Morado moderno */
+}
+
+.card-header.active:hover {
+  background-color: #6d28d9; /* Morado un poco más oscuro al pasar el cursor */
+}
+
+.card-header:hover {
+  background: #1d4ed8;
+}
+
+.card-header .badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.card-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0 1.25rem;
+  background: #ffffff;
+  border-top: 1px solid transparent;
+  transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+
+.card-body.open {
+  max-height: 500px; /* Altura máxima suficiente para desplegar el contenido */
+  opacity: 1;
+  padding: 1.25rem;
+  border-top-color: #e2e8f0;
+}
+
+/* --- SIMULADOR INTERACTIVO (DEMO BOX) --- */
+.demo-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.demo-box h4 {
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.inputs-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.inputs-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.inputs-group input {
+  width: 90px;
+  padding: 0.4rem;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.btn-sim {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-sim:hover {
+  background: #059669;
+}
+
+.result-box {
+  background: #e2e8f0;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: #2563eb;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+/* Corrección de alineación para la tabla de especificaciones */
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.specs-table th, 
+.specs-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;           /* Alinea todo el texto a la izquierda */
+  vertical-align: top;        /* Alinea el contenido arriba si hay varias líneas */
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Define anchos fijos para que las columnas no se desplacen */
+.specs-table th:first-child,
+.specs-table td:first-child {
+  width: 35%;                 /* Ancho fijo para la columna Parámetro */
+  font-weight: 600;
+  white-space: nowrap;        /* Evita que los nombres de parámetros se rompan feo */
+}
+
+.specs-table th:last-child,
+.specs-table td:last-child {
+  width: 65%;                 /* Ancho para la columna Detalle */
+}
+
+/* Botón Secundario / Más Pequeño */
+.btn-secondary {
+  display: inline-block;
+  background-color: transparent;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  padding: 0.4rem 0.8rem;      /* Menos relleno (más compacto) */
+  font-size: 0.85rem;           /* Texto más pequeño */
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+/* Efecto Hover para el Botón Secundario */
+.btn-secondary:hover {
+  background-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Contenedor de botón alineado a la izquierda dentro de subsecciones */
+.btn-container-left {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.75rem;
+}

@@ -1,113 +1,148 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instrucción Tipo R - Datapath</title>
-    <link rel="stylesheet" href="estilos.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flujo de Datos - Tipo R (MIPS32)</title>
+  <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
 
-    <header>
-        <h1>Flujo de Datos: Tipo R</h1>
-        <p><a href="index.html" style="color: white; text-decoration: underline;">Volver al Inicio</a></p>
-    </header>
+  <!-- Navegación Unificada -->
+  <nav class="navbar">
+    <a href="index.html">
+      <div class="logo">MIPS32 CPU</div>
+    </a> 
+    <ul>
+      <li><a href="arquitectura.html">Arquitectura</a></li>
+      <li><a href="instrucciones.html" class="active">Instrucciones & Simulación</a></li>
+    </ul>
+  </nav>
 
-    <div class="contenedor">
-        <div class="tarjeta">
-            <h2>Mapa del Datapath (Tipo R)</h2>
-            <!-- Aquí pones tu imagen con la ruta del Tipo R resaltada -->
-            <img src="Imagenes/TipoR.png" class="imagen-instruccion" alt="Ruta resaltada Tipo R">
-            
-            <div class="panel-control">
-                <label>Operación:</label>
-                <select id="operacion">
-                    <option value="suma">ADD (Suma)</option>
-                    <option value="resta">SUB (Resta)</option>
-                </select>
+  <div class="container">
+    <section class="hero">
+      <h1>Simulación de Flujo de Datos: Tipo R</h1>
+      <p>Visualiza cómo viajan los datos y qué señales de control se activan en la arquitectura MIPS32.</p>
+    </section>
 
-                <label>Valor RS:</label>
-                <input type="number" id="valor_rs" value="15">
+    <div class="card-section">
+      <h2>🗺️ Mapa del Datapath (Tipo R)</h2>
 
-                <label>Valor RT:</label>
-                <input type="number" id="valor_rt" value="10">
+      <!-- Imagen con marco y responsiva -->
+      <div class="bit-format" style="text-align: center;">
+        <img src="Imagenes/TipoR.png" class="imagen-instruccion" alt="Ruta destacada Tipo R" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+      </div>
+      
+      <!-- Panel de Controles / Entradas -->
+      <div class="demo-box">
+        <h4>🎛️ Configuración de Parámetros</h4>
+        
+        <div class="inputs-group">
+          <label>Operación:
+            <select id="operacion" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">
+              <option value="suma">ADD (Suma)</option>
+              <option value="resta">SUB (Resta)</option>
+            </select>
+          </label>
 
-                <label>Registro Destino (RD):</label>
-                <input type="text" id="reg_rd" value="$t0">
+          <label>Valor $rs: 
+            <input type="number" id="valor_rs" value="15">
+          </label>
 
-                <button class="btn-ejecutar" onclick="ejecutarTipoR()">Ejecutar Flujo</button>
-            </div>
+          <label>Valor $rt: 
+            <input type="number" id="valor_rt" value="10">
+          </label>
 
-            <h3>Estado de las Señales de Control</h3>
-            <table>
-                <tr>
-                    <th>RegDst</th>
-                    <th>ALUSrc</th>
-                    <th>MemToReg</th>
-                    <th>RegWrite</th>
-                    <th>MemRead</th>
-                    <th>MemWrite</th>
-                    <th>Branch</th>
-                </tr>
-                <tr>
-                    <td id="s_regdst">-</td>
-                    <td id="s_alusrc">-</td>
-                    <td id="s_memtoreg">-</td>
-                    <td id="s_regwrite">-</td>
-                    <td id="s_memread">-</td>
-                    <td id="s_memwrite">-</td>
-                    <td id="s_branch">-</td>
-                </tr>
-            </table>
+          <label>Registro $rd: 
+            <input type="text" id="reg_rd" value="$t0" style="width: 70px;">
+          </label>
 
-            <div id="texto-explicacion" class="texto-flujo" style="display: none;">
-                <!-- Aquí se inyectará el texto descriptivo con JavaScript -->
-            </div>
+          <button class="btn-sim" onclick="ejecutarTipoR()">Ejecutar Flujo ➔</button>
         </div>
+
+        <!-- Estado de las Señales de Control -->
+        <div class="control-signals">
+          <h4>🎛️ Estado de las Señales de Control</h4>
+          <table class="signals-table">
+            <thead>
+              <tr>
+                <th>RegDst</th>
+                <th>ALUSrc</th>
+                <th>MemToReg</th>
+                <th>RegWrite</th>
+                <th>MemRead</th>
+                <th>MemWrite</th>
+                <th>Branch</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="s_regdst">-</td>
+                <td id="s_alusrc">-</td>
+                <td id="s_memtoreg">-</td>
+                <td id="s_regwrite">-</td>
+                <td id="s_memread">-</td>
+                <td id="s_memwrite">-</td>
+                <td id="s_branch">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Resultado y Explicación Dinámica -->
+        <div id="texto-explicacion" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;">
+          <!-- Se inyecta el texto descriptivo en JS -->
+        </div>
+
+      </div>
     </div>
+  </div>
 
-    <script>
-        function ejecutarTipoR() {
-            // 1. Obtener los valores que ingresó el usuario
-            const operacion = document.getElementById("operacion").value;
-            const rs = parseInt(document.getElementById("valor_rs").value);
-            const rt = parseInt(document.getElementById("valor_rt").value);
-            const rd = document.getElementById("reg_rd").value;
+  <script>
+    function ejecutarTipoR() {
+      // 1. Obtener valores del usuario
+      const operacion = document.getElementById("operacion").value;
+      const rs = parseInt(document.getElementById("valor_rs").value) || 0;
+      const rt = parseInt(document.getElementById("valor_rt").value) || 0;
+      const rd = document.getElementById("reg_rd").value || "$t0";
 
-            // 2. Calcular el resultado de la ALU
-            let resultadoALU = 0;
-            let nombreOperacion = "";
-            
-            if (operacion === "suma") {
-                resultadoALU = rs + rt;
-                nombreOperacion = "sumó";
-            } else {
-                resultadoALU = rs - rt;
-                nombreOperacion = "restó";
-            }
+      // 2. Cálculo en la ALU
+      let resultadoALU = 0;
+      let nombreOp = "";
+      
+      if (operacion === "suma") {
+        resultadoALU = rs + rt;
+        nombreOp = "sumó";
+      } else {
+        resultadoALU = rs - rt;
+        nombreOp = "restó";
+      }
 
-            // 3. Actualizar la tabla de señales de control (Valores fijos para Tipo R)
-            document.getElementById("s_regdst").innerText = "1";
-            document.getElementById("s_alusrc").innerText = "0";
-            document.getElementById("s_memtoreg").innerText = "0";
-            document.getElementById("s_regwrite").innerText = "1";
-            document.getElementById("s_memread").innerText = "0";
-            document.getElementById("s_memwrite").innerText = "0";
-            document.getElementById("s_branch").innerText = "0";
+      // 3. Actualizar tabla de señales de control
+      document.getElementById("s_regdst").innerText = "1 (rd)";
+      document.getElementById("s_alusrc").innerText = "0 (rt)";
+      document.getElementById("s_memtoreg").innerText = "0 (ALU)";
+      document.getElementById("s_regwrite").innerText = "1 (Sí)";
+      document.getElementById("s_memread").innerText = "0";
+      document.getElementById("s_memwrite").innerText = "0";
+      document.getElementById("s_branch").innerText = "0";
 
-            // 4. Crear el texto dinámico paso a paso
-            const textoDiv = document.getElementById("texto-explicacion");
-            textoDiv.style.display = "block";
-            textoDiv.innerHTML = `
-                <strong>Flujo actual:</strong><br><br>
-                1. La Unidad de Control detecta el opcode y activa <b>RegDst=1</b> y <b>RegWrite=1</b>.<br>
-                2. El Banco de Registros lee los valores de entrada: <b>RS = ${rs}</b> y <b>RT = ${rt}</b>.<br>
-                3. Como <b>ALUSrc=0</b>, ambos valores pasan directamente a la ALU.<br>
-                4. La ALU recibe la señal de control y <b>${nombreOperacion}</b> los valores: (${rs} y ${rt}) dando como resultado <b>${resultadoALU}</b>.<br>
-                5. Como <b>MemToReg=0</b>, el resultado de la ALU (${resultadoALU}) esquiva la Memoria de Datos y viaja por el cable inferior de regreso al Banco de Registros.<br>
-                6. El valor <b>${resultadoALU}</b> se guarda exitosamente en el registro destino <b>${rd}</b>.
-            `;
-        }
-    </script>
+      // 4. Mostrar explicación del flujo paso a paso
+      const textoDiv = document.getElementById("texto-explicacion");
+      textoDiv.style.display = "block";
+      textoDiv.innerHTML = `
+        <h4 style="color: #1e293b; margin-bottom: 0.5rem;">⚡ Traza de Ejecución en el Datapath:</h4>
+        <ol style="padding-left: 1.2rem; margin: 0;">
+          <li>La <strong>Unidad de Control</strong> interpreta la instrucción de Tipo R y establece <code>RegDst = 1</code>, <code>ALUSrc = 0</code> y <code>RegWrite = 1</code>.</li>
+          <li>El <strong>Banco de Registros</strong> entrega los datos: <code>$rs = ${rs}</code> y <code>$rt = ${rt}</code>.</li>
+          <li>Dado que <code>ALUSrc = 0</code>, la <strong>ALU</strong> recibe directamente <code>$rs</code> y <code>$rt</code> como operandos.</li>
+          <li>La <strong>ALU</strong> ${nombreOp} los valores (<code>${rs}</code> y <code>${rt}</code>) dando un resultado de <strong>${resultadoALU}</strong>.</li>
+          <li>Como <code>MemToReg = 0</code>, el resultado pasa directo sin consultar la Memoria de Datos.</li>
+          <li>El resultado final <strong>${resultadoALU}</strong> se escribe correctamente en el registro de destino <strong>${rd}</strong>.</li>
+        </ol>
+      `;
+    }
+  </script>
+
 </body>
 </html>
