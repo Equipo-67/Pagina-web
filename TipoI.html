@@ -1,11 +1,98 @@
-<!-- InstruccionesI.html -->
-<!DOCTYPE html>
+<!-- TipoI.html -->
+<<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flujo de Datos - Tipo I (MIPS32)</title>
   <link rel="stylesheet" href="estilos.css">
+  <style>
+    /* Estilos de la tabla de instrucciones */
+    .isa-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem 0;
+      font-size: 0.95rem;
+      color: #1e293b;
+      background-color: #ffffff;
+    }
+    .isa-table th {
+      background-color: #e2e8f0;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid #94a3b8;
+    }
+    .isa-table td {
+      padding: 0.65rem 0.9rem;
+      border: 1px solid #94a3b8;
+      vertical-align: middle;
+    }
+    .isa-table tr:hover {
+      background-color: #f8fafc;
+    }
+    .isa-type {
+      font-weight: 600;
+      color: #475569;
+      margin-right: 0.5rem;
+    }
+    .isa-code {
+      font-family: 'Consolas', monospace;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* Estilos y animación del diagrama SVG */
+    .mini-datapath-svg {
+      width: 100%;
+      max-width: 780px;
+      height: auto;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+    .dp-box {
+      fill: #ffffff;
+      stroke: #475569;
+      stroke-width: 2;
+      rx: 6;
+    }
+    .dp-box.active-block {
+      stroke: #2563eb;
+      fill: #eff6ff;
+      transition: all 0.3s ease;
+    }
+    .dp-label {
+      fill: #0f172a;
+      font-size: 12px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+    .dp-wire {
+      fill: none;
+      stroke: #94a3b8;
+      stroke-width: 2.5;
+    }
+    .dp-wire.flowing {
+      stroke: #10b981;
+      stroke-width: 3.5;
+      stroke-dasharray: 8 4;
+      animation: flujoDatos 0.8s linear infinite;
+    }
+    .dp-data-tag {
+      fill: #047857;
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      font-weight: bold;
+      text-anchor: middle;
+    }
+    @keyframes flujoDatos {
+      from { stroke-dashoffset: 24; }
+      to   { stroke-dashoffset: 0; }
+    }
+  </style>
 </head>
 <body>
 
@@ -20,23 +107,119 @@
       <li><a href="instrucciones.html">Instrucciones & Simulación</a></li>
       <li><a href="TipoR.html"> Tipo R </a></li>
       <li><a href="TipoJ.html"> Tipo J </a></li>
-
-
     </ul>
   </nav>
 
   <div class="container">
     <section class="hero">
       <h1>Simulación de Flujo de Datos: Tipo I</h1>
-      <p>Visualiza cómo viajan los datos y qué señales de control se activan en la arquitectura MIPS32.</p>
+      <p>Observa cómo viajan los datos cuando intervienen valores inmediatos de 16 bits, accesos a la Memoria RAM o decisiones de salto condicional.</p>
     </section>
 
+    <!-- Tabla de referencia rápida -->
     <div class="card-section">
-      <h2>🗺️ Mapa del Datapath (Tipo I)</h2>
+      <h2>📋 Conjunto de Instrucciones Tipo I</h2>
+      <p>Operan utilizando un registro fuente (<code>$rs</code>) y un valor constante o desplazamiento de 16 bits (<code>#imm</code> / <code>#desp</code>)[cite: 2].</p>
 
-      <!-- Imagen con marco y responsiva -->
+      <table class="isa-table">
+        <thead>
+          <tr>
+            <th>Tipo y sintaxis</th>
+            <th>Opcode / funct (hex)</th>
+            <th>Operación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="isa-type">I</span> <span class="isa-code">addi $rt, $rs, #imm</span></td>
+            <td class="isa-code">09</td>
+            <td>Suma módulo 2³² con inmediato extendido con signo.[cite: 6]</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">I</span> <span class="isa-code">ori $rt, $rs, #imm</span></td>
+            <td class="isa-code">0D</td>
+            <td>OR con inmediato extendido con ceros.[cite: 6]</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">I</span> <span class="isa-code">lw $rt, #desp($rs)</span></td>
+            <td class="isa-code">23</td>
+            <td>Carga una palabra de 32 bits en rt.[cite: 6]</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">I</span> <span class="isa-code">sw $rt, #desp($rs)</span></td>
+            <td class="isa-code">2B</td>
+            <td>Guarda la palabra de rt en memoria.[cite: 6]</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">I</span> <span class="isa-code">beq $rs, $rt, #etiqueta</span></td>
+            <td class="isa-code">04</td>
+            <td>Toma el salto si rs = rt.[cite: 6]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mapa Animado y Simulación -->
+    <div class="card-section">
+      <h2>🗺️ Mapa del Datapath Animado (Tipo I)</h2>
+
       <div class="bit-format" style="text-align: center;">
-        <img src="Imagenes/TipoI.png" class="imagen-instruccion" alt="Ruta destacada Tipo R" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <svg viewBox="0 0 760 250" class="mini-datapath-svg">
+          <defs>
+            <marker id="flecha-gris" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+            </marker>
+            <marker id="flecha-verde" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+            </marker>
+          </defs>
+
+          <!-- Bloques de Hardware -->
+          <rect id="blk-inst" x="15" y="65" width="95" height="80" class="dp-box"/>
+          <text x="62" y="102" class="dp-label">Instrucción</text>
+          <text x="62" y="117" class="dp-label" style="font-size:10px; fill:#64748b;">(32 bits)</text>
+
+          <rect id="blk-regs" x="165" y="30" width="115" height="105" class="dp-box"/>
+          <text x="222" y="80" class="dp-label">Banco de</text>
+          <text x="222" y="95" class="dp-label">Registros</text>
+
+          <rect id="blk-ext" x="165" y="160" width="115" height="50" class="dp-box"/>
+          <text x="222" y="183" class="dp-label">Extensor</text>
+          <text x="222" y="198" class="dp-label" style="font-size:10px; fill:#64748b;">16 ➔ 32 bits</text>
+
+          <polygon id="blk-alu" points="355,45 425,70 425,115 355,140 355,103 372,92 355,82" class="dp-box"/>
+          <text x="394" y="96" class="dp-label">ALU</text>
+
+          <rect id="blk-mem" x="505" y="45" width="115" height="105" class="dp-box"/>
+          <text x="562" y="95" class="dp-label">Memoria</text>
+          <text x="562" y="110" class="dp-label">de Datos</text>
+
+          <!-- Cables -->
+          <!-- Inst -> Regs -->
+          <path id="w-rs" d="M 110 80 L 165 80" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Inst -> Extensor -->
+          <path id="w-imm" d="M 110 125 L 135 125 L 135 185 L 165 185" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Regs (rs) -> ALU -->
+          <path id="w-alu-a" d="M 280 65 L 355 65" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Regs (rt) -> ALU (para BEQ) -->
+          <path id="w-rt-alu" d="M 280 112 L 355 112" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Extensor -> ALU -->
+          <path id="w-ext-alu" d="M 280 185 L 325 185 L 325 120 L 355 120" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- ALU -> Memoria -->
+          <path id="w-alu-mem" d="M 425 92 L 505 92" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Regs (rt) -> Memoria Write Data (para SW) -->
+          <path id="w-sw-data" d="M 280 112 L 305 112 L 305 158 L 465 158 L 465 130 L 505 130" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Memoria -> WriteBack Regs (para LW) -->
+          <path id="w-mem-wb" d="M 620 92 L 680 92 L 680 232 L 145 232 L 145 115 L 165 115" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- ALU -> WriteBack Regs (para ADDI / ORI) -->
+          <path id="w-alu-wb" d="M 425 92 L 450 92 L 450 232 L 145 232 L 145 115 L 165 115" class="dp-wire" marker-end="url(#flecha-gris)"/>
+
+          <!-- Etiquetas dinámicas -->
+          <text id="tag-i-a" x="317" y="57" class="dp-data-tag"></text>
+          <text id="tag-i-b" x="325" y="177" class="dp-data-tag"></text>
+          <text id="tag-i-alu" x="465" y="84" class="dp-data-tag"></text>
+          <text id="tag-i-wb" x="420" y="224" class="dp-data-tag"></text>
+        </svg>
       </div>
       
       <!-- Panel de Controles / Entradas -->
@@ -44,26 +227,29 @@
         <h4>🎛️ Configuración de Parámetros</h4>
         
         <div class="inputs-group">
-          <label>Operación:
-            <select id="operacion" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">
-              <option value="suma">ADD (Suma)</option>
-              <option value="resta">SUB (Resta)</option>
+          <label>Instrucción:
+            <select id="operacionI" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">
+              <option value="addi">ADDI (Suma Inmediata)</option>
+              <option value="ori">ORI (OR Inmediato)</option>
+              <option value="lw">LW (Cargar de Memoria)</option>
+              <option value="sw">SW (Guardar en Memoria)</option>
+              <option value="beq">BEQ (Salto si es Igual)</option>
             </select>
           </label>
 
           <label>Valor $rs: 
-            <input type="number" id="valor_rs" value="15">
+            <input type="number" id="valor_rs_i" value="12">
           </label>
 
           <label>Valor $rt: 
-            <input type="number" id="valor_rt" value="10">
+            <input type="number" id="valor_rt_i" value="12">
           </label>
 
-          <label>Registro $rd: 
-            <input type="text" id="reg_rd" value="$t0" style="width: 70px;">
+          <label>Inmediato / Desp: 
+            <input type="number" id="valor_imm_i" value="4">
           </label>
 
-          <button class="btn-sim" onclick="ejecutarTipoR()">Ejecutar Flujo ➔</button>
+          <button class="btn-sim" onclick="ejecutarTipoI()">Ejecutar Flujo ➔</button>
         </div>
 
         <!-- Estado de las Señales de Control -->
@@ -83,69 +269,135 @@
             </thead>
             <tbody>
               <tr>
-                <td id="s_regdst">-</td>
-                <td id="s_alusrc">-</td>
-                <td id="s_memtoreg">-</td>
-                <td id="s_regwrite">-</td>
-                <td id="s_memread">-</td>
-                <td id="s_memwrite">-</td>
-                <td id="s_branch">-</td>
+                <td id="si_regdst">-</td>
+                <td id="si_alusrc">-</td>
+                <td id="si_memtoreg">-</td>
+                <td id="si_regwrite">-</td>
+                <td id="si_memread">-</td>
+                <td id="si_memwrite">-</td>
+                <td id="si_branch">-</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <!-- Resultado y Explicación Dinámica -->
-        <div id="texto-explicacion" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;">
-          <!-- Se inyecta el texto descriptivo en JS -->
-        </div>
+        <div id="texto-explicacion-i" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;"></div>
+      </div>
 
+      <!-- Enlace hacia el simulador unificado -->
+      <div class="btn-container" style="margin-top: 1.5rem;">
+        <a href="instrucciones.html" class="btn-secondary">⬅ Volver a Instrucciones & Simulación Completa</a>
       </div>
     </div>
   </div>
 
   <script>
-    function ejecutarTipoR() {
-      // 1. Obtener valores del usuario
-      const operacion = document.getElementById("operacion").value;
-      const rs = parseInt(document.getElementById("valor_rs").value) || 0;
-      const rt = parseInt(document.getElementById("valor_rt").value) || 0;
-      const rd = document.getElementById("reg_rd").value || "$t0";
+    function limpiarDiagramaI() {
+      ["blk-inst", "blk-regs", "blk-ext", "blk-alu", "blk-mem"].forEach(id => {
+        document.getElementById(id).classList.remove("active-block");
+      });
+      ["w-rs", "w-imm", "w-alu-a", "w-rt-alu", "w-ext-alu", "w-alu-mem", "w-sw-data", "w-mem-wb", "w-alu-wb"].forEach(id => {
+        const w = document.getElementById(id);
+        w.classList.remove("flowing");
+        w.setAttribute("marker-end", "url(#flecha-gris)");
+      });
+      ["tag-i-a", "tag-i-b", "tag-i-alu", "tag-i-wb"].forEach(id => {
+        document.getElementById(id).textContent = "";
+      });
+    }
 
-      // 2. Cálculo en la ALU
-      let resultadoALU = 0;
-      let nombreOp = "";
-      
-      if (operacion === "suma") {
-        resultadoALU = rs + rt;
-        nombreOp = "sumó";
-      } else {
-        resultadoALU = rs - rt;
-        nombreOp = "restó";
+    function activarRutaI(bloques, cables) {
+      bloques.forEach(id => document.getElementById(id).classList.add("active-block"));
+      cables.forEach(id => {
+        const w = document.getElementById(id);
+        w.classList.add("flowing");
+        w.setAttribute("marker-end", "url(#flecha-verde)");
+      });
+    }
+
+    function ejecutarTipoI() {
+      limpiarDiagramaI();
+
+      const op = document.getElementById("operacionI").value;
+      const rs = parseInt(document.getElementById("valor_rs_i").value) || 0;
+      const rt = parseInt(document.getElementById("valor_rt_i").value) || 0;
+      const imm = parseInt(document.getElementById("valor_imm_i").value) || 0;
+
+      let regDst = "0 (rt)", aluSrc = "1 (Imm)", memToReg = "0 (ALU)", regWrite = "1 (Sí)", memRead = "0", memWrite = "0", branch = "0";
+      let pasos = "";
+
+      if (op === "addi") {
+        const res = rs + imm;
+        activarRutaI(["blk-inst", "blk-regs", "blk-ext", "blk-alu"], ["w-rs", "w-imm", "w-alu-a", "w-ext-alu", "w-alu-wb"]);
+        document.getElementById("tag-i-a").textContent = `rs=${rs}`;
+        document.getElementById("tag-i-b").textContent = `imm=${imm}`;
+        document.getElementById("tag-i-wb").textContent = `$rt = ${res}`;
+        pasos = `
+          <li>La <strong>Unidad de Control</strong> (<code>opcode = 0x09</code>) activa <code>ALUSrc = 1</code> y <code>RegWrite = 1</code>.</li>
+          <li>El <strong>Extensor</strong> amplía el inmediato <code>${imm}</code> de 16 a 32 bits con signo.</li>
+          <li>La <strong>ALU</strong> suma <code>$rs (${rs}) + imm (${imm}) = ${res}</code>.</li>
+          <li>Como <code>RegDst = 0</code>, el resultado <strong>${res}</strong> regresa y se guarda en <code>$rt</code>.</li>`;
+      } else if (op === "ori") {
+        const res = rs | imm;
+        activarRutaI(["blk-inst", "blk-regs", "blk-ext", "blk-alu"], ["w-rs", "w-imm", "w-alu-a", "w-ext-alu", "w-alu-wb"]);
+        document.getElementById("tag-i-a").textContent = `rs=${rs}`;
+        document.getElementById("tag-i-b").textContent = `imm=${imm}`;
+        document.getElementById("tag-i-wb").textContent = `$rt = ${res}`;
+        pasos = `
+          <li>La <strong>Unidad de Control</strong> (<code>opcode = 0x0D</code>) activa <code>ALUSrc = 1</code> y <code>RegWrite = 1</code>.</li>
+          <li>El inmediato <code>${imm}</code> se extiende con ceros a 32 bits.</li>
+          <li>La <strong>ALU</strong> ejecuta la operación OR bit a bit: <code>${rs} | ${imm} = ${res}</code>.</li>
+          <li>El resultado <strong>${res}</strong> se escribe en el registro destino <code>$rt</code>.</li>`;
+      } else if (op === "lw") {
+        const dir = rs + imm;
+        memToReg = "1 (Mem)"; memRead = "1 (Sí)";
+        activarRutaI(["blk-inst", "blk-regs", "blk-ext", "blk-alu", "blk-mem"], ["w-rs", "w-imm", "w-alu-a", "w-ext-alu", "w-alu-mem", "w-mem-wb"]);
+        document.getElementById("tag-i-a").textContent = `rs=${rs}`;
+        document.getElementById("tag-i-b").textContent = `desp=${imm}`;
+        document.getElementById("tag-i-alu").textContent = `Dir=${dir}`;
+        document.getElementById("tag-i-wb").textContent = `$rt = RAM[${dir}]`;
+        pasos = `
+          <li>La <strong>Unidad de Control</strong> (<code>opcode = 0x23</code>) enciende <code>ALUSrc = 1</code>, <code>MemRead = 1</code>, <code>MemToReg = 1</code> y <code>RegWrite = 1</code>.</li>
+          <li>La <strong>ALU</strong> calcula la dirección efectiva: <code>$rs (${rs}) + desp (${imm}) = ${dir}</code>.</li>
+          <li>La <strong>Memoria de Datos</strong> lee la palabra en la dirección <strong>${dir}</strong> y la envía de vuelta hacia el registro <code>$rt</code>.</li>`;
+      } else if (op === "sw") {
+        const dir = rs + imm;
+        regDst = "X"; memToReg = "X"; regWrite = "0"; memWrite = "1 (Sí)";
+        activarRutaI(["blk-inst", "blk-regs", "blk-ext", "blk-alu", "blk-mem"], ["w-rs", "w-imm", "w-alu-a", "w-ext-alu", "w-alu-mem", "w-sw-data"]);
+        document.getElementById("tag-i-a").textContent = `rs=${rs}`;
+        document.getElementById("tag-i-b").textContent = `desp=${imm}`;
+        document.getElementById("tag-i-alu").textContent = `Dir=${dir}`;
+        document.getElementById("tag-i-wb").textContent = `RAM[${dir}] = ${rt}`;
+        pasos = `
+          <li>La <strong>Unidad de Control</strong> (<code>opcode = 0x2B</code>) activa <code>ALUSrc = 1</code> y <code>MemWrite = 1</code> (apaga <code>RegWrite</code>).</li>
+          <li>La <strong>ALU</strong> calcula la dirección destino: <code>$rs (${rs}) + desp (${imm}) = ${dir}</code>.</li>
+          <li>El valor <code>$rt (${rt})</code> viaja directo al puerto de escritura de la <strong>Memoria de Datos</strong> y se guarda en <strong>RAM[${dir}]</strong>.</li>`;
+      } else if (op === "beq") {
+        const iguales = (rs === rt);
+        regDst = "X"; aluSrc = "0 (rt)"; memToReg = "X"; regWrite = "0"; branch = "1 (Sí)";
+        activarRutaI(["blk-inst", "blk-regs", "blk-alu"], ["w-rs", "w-alu-a", "w-rt-alu"]);
+        document.getElementById("tag-i-a").textContent = `rs=${rs}`;
+        document.getElementById("tag-i-alu").textContent = iguales ? "Zero=1" : "Zero=0";
+        pasos = `
+          <li>La <strong>Unidad de Control</strong> (<code>opcode = 0x04</code>) activa <code>Branch = 1</code> y pone <code>ALUSrc = 0</code>.</li>
+          <li>La <strong>ALU</strong> resta <code>$rs (${rs}) - $rt (${rt}) = ${rs - rt}</code> para evaluar la bandera <code>Zero</code>.</li>
+          <li>Resultado: <strong>${iguales ? "Zero = 1 (Son iguales ➔ SALTO TOMADO hacia PC + 4 + desp×4)" : "Zero = 0 (Son distintos ➔ NO salta, continúa en PC + 4)"}</strong>.</li>`;
       }
 
-      // 3. Actualizar tabla de señales de control
-      document.getElementById("s_regdst").innerText = "1 (rd)";
-      document.getElementById("s_alusrc").innerText = "0 (rt)";
-      document.getElementById("s_memtoreg").innerText = "0 (ALU)";
-      document.getElementById("s_regwrite").innerText = "1 (Sí)";
-      document.getElementById("s_memread").innerText = "0";
-      document.getElementById("s_memwrite").innerText = "0";
-      document.getElementById("s_branch").innerText = "0";
+      document.getElementById("si_regdst").innerText = regDst;
+      document.getElementById("si_alusrc").innerText = aluSrc;
+      document.getElementById("si_memtoreg").innerText = memToReg;
+      document.getElementById("si_regwrite").innerText = regWrite;
+      document.getElementById("si_memread").innerText = memRead;
+      document.getElementById("si_memwrite").innerText = memWrite;
+      document.getElementById("si_branch").innerText = branch;
 
-      // 4. Mostrar explicación del flujo paso a paso
-      const textoDiv = document.getElementById("texto-explicacion");
+      const textoDiv = document.getElementById("texto-explicacion-i");
       textoDiv.style.display = "block";
       textoDiv.innerHTML = `
         <h4 style="color: #1e293b; margin-bottom: 0.5rem;">⚡ Traza de Ejecución en el Datapath:</h4>
-        <ol style="padding-left: 1.2rem; margin: 0;">
-          <li>La <strong>Unidad de Control</strong> interpreta la instrucción de Tipo R y establece <code>RegDst = 1</code>, <code>ALUSrc = 0</code> y <code>RegWrite = 1</code>.</li>
-          <li>El <strong>Banco de Registros</strong> entrega los datos: <code>$rs = ${rs}</code> y <code>$rt = ${rt}</code>.</li>
-          <li>Dado que <code>ALUSrc = 0</code>, la <strong>ALU</strong> recibe directamente <code>$rs</code> y <code>$rt</code> como operandos.</li>
-          <li>La <strong>ALU</strong> ${nombreOp} los valores (<code>${rs}</code> y <code>${rt}</code>) dando un resultado de <strong>${resultadoALU}</strong>.</li>
-          <li>Como <code>MemToReg = 0</code>, el resultado pasa directo sin consultar la Memoria de Datos.</li>
-          <li>El resultado final <strong>${resultadoALU}</strong> se escribe correctamente en el registro de destino <strong>${rd}</strong>.</li>
-        </ol>
+        <ol style="padding-left: 1.2rem; margin: 0;">${pasos}</ol>
       `;
     }
   </script>

@@ -1,4 +1,4 @@
-<!-- InstruccionesJ.html -->
+<!-- TipoJ.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +6,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flujo de Datos - Tipo J (MIPS32)</title>
   <link rel="stylesheet" href="estilos.css">
+  <style>
+    /* Estilos de la tabla de instrucciones */
+    .isa-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem 0;
+      font-size: 0.95rem;
+      color: #1e293b;
+      background-color: #ffffff;
+    }
+    .isa-table th {
+      background-color: #e2e8f0;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid #94a3b8;
+    }
+    .isa-table td {
+      padding: 0.65rem 0.9rem;
+      border: 1px solid #94a3b8;
+      vertical-align: middle;
+    }
+    .isa-table tr:hover {
+      background-color: #f8fafc;
+    }
+    .isa-type {
+      font-weight: 600;
+      color: #475569;
+      margin-right: 0.5rem;
+    }
+    .isa-code {
+      font-family: 'Consolas', monospace;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* Estilos y animación del diagrama SVG */
+    .mini-datapath-svg {
+      width: 100%;
+      max-width: 720px;
+      height: auto;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+    .dp-box {
+      fill: #ffffff;
+      stroke: #475569;
+      stroke-width: 2;
+      rx: 6;
+    }
+    .dp-box.active-block {
+      stroke: #2563eb;
+      fill: #eff6ff;
+      transition: all 0.3s ease;
+    }
+    .dp-label {
+      fill: #0f172a;
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+    .dp-wire {
+      fill: none;
+      stroke: #94a3b8;
+      stroke-width: 2.5;
+    }
+    .dp-wire.flowing {
+      stroke: #10b981;
+      stroke-width: 3.5;
+      stroke-dasharray: 8 4;
+      animation: flujoDatos 0.8s linear infinite;
+    }
+    .dp-data-tag {
+      fill: #047857;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      font-weight: bold;
+      text-anchor: middle;
+    }
+    @keyframes flujoDatos {
+      from { stroke-dashoffset: 24; }
+      to   { stroke-dashoffset: 0; }
+    }
+  </style>
 </head>
 <body>
 
@@ -20,22 +107,79 @@
       <li><a href="instrucciones.html">Instrucciones & Simulación</a></li>
       <li><a href="TipoR.html"> Tipo R </a></li>
       <li><a href="TipoI.html"> Tipo I </a></li>
-
     </ul>
   </nav>
 
   <div class="container">
     <section class="hero">
       <h1>Simulación de Flujo de Datos: Tipo J</h1>
-      <p>Visualiza cómo viajan los datos y qué señales de control se activan en la arquitectura MIPS32.</p>
+      <p>Observa cómo los saltos incondicionales actualizan directamente el Contador de Programa (PC) sin utilizar la ALU ni el banco de registros.</p>
     </section>
 
+    <!-- Tabla de referencia rápida -->
     <div class="card-section">
-      <h2>🗺️ Mapa del Datapath (Tipo J)</h2>
+      <h2>📋 Conjunto de Instrucciones Tipo J</h2>
+      <p>Emplean un campo de 26 bits (<code>#etiqueta</code> / índice) para saltar directamente a otra dirección dentro de la misma región de memoria[cite: 2].</p>
 
-      <!-- Imagen con marco y responsiva -->
+      <table class="isa-table">
+        <thead>
+          <tr>
+            <th>Tipo y sintaxis</th>
+            <th>Opcode / funct (hex)</th>
+            <th>Operación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="isa-type">J</span> <span class="isa-code">j #etiqueta</span></td>
+            <td class="isa-code">02</td>
+            <td>Salta dentro de la región de PC + 4.[cite: 6]</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mapa Animado y Simulación -->
+    <div class="card-section">
+      <h2>🗺️ Mapa del Datapath Animado (Tipo J)</h2>
+
       <div class="bit-format" style="text-align: center;">
-        <img src="Imagenes/TipoJ.png" class="imagen-instruccion" alt="Ruta destacada Tipo R" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <svg viewBox="0 0 680 220" class="mini-datapath-svg">
+          <defs>
+            <marker id="flecha-gris" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+            </marker>
+            <marker id="flecha-verde" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+            </marker>
+          </defs>
+
+          <!-- Bloques de Hardware -->
+          <rect id="blk-pc" x="45" y="95" width="85" height="75" class="dp-box"/>
+          <text x="87" y="130" class="dp-label">PC</text>
+          <text x="87" y="146" class="dp-label" style="font-size:10px; fill:#64748b;">(32 bits)</text>
+
+          <rect id="blk-imem" x="210" y="95" width="135" height="75" class="dp-box"/>
+          <text x="277" y="130" class="dp-label">Memoria de</text>
+          <text x="277" y="146" class="dp-label">Instrucciones</text>
+
+          <rect id="blk-shift" x="435" y="95" width="145" height="75" class="dp-box"/>
+          <text x="507" y="128" class="dp-label">Shift Left 2 (×4)</text>
+          <text x="507" y="145" class="dp-label" style="font-size:10px; fill:#64748b;">+ PC+4[31:28]</text>
+
+          <!-- Cables -->
+          <!-- PC -> IMEM -->
+          <path id="w-pc-imem" d="M 130 132 L 210 132" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- IMEM [25:0] -> Shift Left 2 -->
+          <path id="w-imem-shift" d="M 345 132 L 435 132" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <!-- Ruta superior de salto hacia el PC -->
+          <path id="w-jump-back" d="M 580 132 L 625 132 L 625 38 L 87 38 L 87 95" class="dp-wire" marker-end="url(#flecha-gris)"/>
+
+          <!-- Etiquetas dinámicas con valores en movimiento -->
+          <text id="tag-j-pc" x="170" y="122" class="dp-data-tag"></text>
+          <text id="tag-j-idx" x="390" y="122" class="dp-data-tag"></text>
+          <text id="tag-j-target" x="355" y="28" class="dp-data-tag"></text>
+        </svg>
       </div>
       
       <!-- Panel de Controles / Entradas -->
@@ -43,26 +187,21 @@
         <h4>🎛️ Configuración de Parámetros</h4>
         
         <div class="inputs-group">
-          <label>Operación:
-            <select id="operacion" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">
-              <option value="suma">ADD (Suma)</option>
-              <option value="resta">SUB (Resta)</option>
+          <label>Instrucción:
+            <select id="operacionJ" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">
+              <option value="j">J (Jump Incondicional)</option>
             </select>
           </label>
 
-          <label>Valor $rs: 
-            <input type="number" id="valor_rs" value="15">
+          <label>PC Actual: 
+            <input type="number" id="pc_actual_j" value="100" readonly>
           </label>
 
-          <label>Valor $rt: 
-            <input type="number" id="valor_rt" value="10">
+          <label>Dirección Destino (múltiplo de 4): 
+            <input type="number" id="pc_destino_j" value="400" step="4">
           </label>
 
-          <label>Registro $rd: 
-            <input type="text" id="reg_rd" value="$t0" style="width: 70px;">
-          </label>
-
-          <button class="btn-sim" onclick="ejecutarTipoR()">Ejecutar Flujo ➔</button>
+          <button class="btn-sim" onclick="ejecutarTipoJ()">Ejecutar Flujo ➔</button>
         </div>
 
         <!-- Estado de las Señales de Control -->
@@ -71,6 +210,7 @@
           <table class="signals-table">
             <thead>
               <tr>
+                <th>Jump</th>
                 <th>RegDst</th>
                 <th>ALUSrc</th>
                 <th>MemToReg</th>
@@ -82,68 +222,80 @@
             </thead>
             <tbody>
               <tr>
-                <td id="s_regdst">-</td>
-                <td id="s_alusrc">-</td>
-                <td id="s_memtoreg">-</td>
-                <td id="s_regwrite">-</td>
-                <td id="s_memread">-</td>
-                <td id="s_memwrite">-</td>
-                <td id="s_branch">-</td>
+                <td id="sj_jump">-</td>
+                <td id="sj_regdst">-</td>
+                <td id="sj_alusrc">-</td>
+                <td id="sj_memtoreg">-</td>
+                <td id="sj_regwrite">-</td>
+                <td id="sj_memread">-</td>
+                <td id="sj_memwrite">-</td>
+                <td id="sj_branch">-</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <!-- Resultado y Explicación Dinámica -->
-        <div id="texto-explicacion" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;">
-          <!-- Se inyecta el texto descriptivo en JS -->
-        </div>
+        <div id="texto-explicacion-j" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;"></div>
+      </div>
 
+      <!-- Enlace hacia el simulador unificado -->
+      <div class="btn-container" style="margin-top: 1.5rem;">
+        <a href="instrucciones.html" class="btn-secondary">⬅ Volver a Instrucciones & Simulación Completa</a>
       </div>
     </div>
   </div>
 
   <script>
-    function ejecutarTipoR() {
-      // 1. Obtener valores del usuario
-      const operacion = document.getElementById("operacion").value;
-      const rs = parseInt(document.getElementById("valor_rs").value) || 0;
-      const rt = parseInt(document.getElementById("valor_rt").value) || 0;
-      const rd = document.getElementById("reg_rd").value || "$t0";
+    function ejecutarTipoJ() {
+      const pcActual = parseInt(document.getElementById("pc_actual_j").value) || 0;
+      const destino = parseInt(document.getElementById("pc_destino_j").value) || 0;
 
-      // 2. Cálculo en la ALU
-      let resultadoALU = 0;
-      let nombreOp = "";
-      
-      if (operacion === "suma") {
-        resultadoALU = rs + rt;
-        nombreOp = "sumó";
-      } else {
-        resultadoALU = rs - rt;
-        nombreOp = "restó";
+      if (destino % 4 !== 0) {
+        alert("La dirección de salto debe ser múltiplo de 4 (alineada a palabra).");
+        return;
       }
 
-      // 3. Actualizar tabla de señales de control
-      document.getElementById("s_regdst").innerText = "1 (rd)";
-      document.getElementById("s_alusrc").innerText = "0 (rt)";
-      document.getElementById("s_memtoreg").innerText = "0 (ALU)";
-      document.getElementById("s_regwrite").innerText = "1 (Sí)";
-      document.getElementById("s_memread").innerText = "0";
-      document.getElementById("s_memwrite").innerText = "0";
-      document.getElementById("s_branch").innerText = "0";
+      const indice26 = (destino >>> 2) & 0x03FFFFFF;
 
-      // 4. Mostrar explicación del flujo paso a paso
-      const textoDiv = document.getElementById("texto-explicacion");
+      // Animar bloques y cables del SVG
+      ["blk-pc", "blk-imem", "blk-shift"].forEach(id => {
+        document.getElementById(id).classList.add("active-block");
+      });
+      ["w-pc-imem", "w-imem-shift", "w-jump-back"].forEach(id => {
+        const w = document.getElementById(id);
+        w.classList.add("flowing");
+        w.setAttribute("marker-end", "url(#flecha-verde)");
+      });
+
+      // Mostrar valores viajando por los cables
+      document.getElementById("tag-j-pc").textContent = `PC=${pcActual}`;
+      document.getElementById("tag-j-idx").textContent = `idx=${indice26}`;
+      document.getElementById("tag-j-target").textContent = `Nuevo PC = ${destino}`;
+
+      // Actualizar señales de control
+      document.getElementById("sj_jump").innerText = "1 (Sí)";
+      document.getElementById("sj_regdst").innerText = "X";
+      document.getElementById("sj_alusrc").innerText = "X";
+      document.getElementById("sj_memtoreg").innerText = "X";
+      document.getElementById("sj_regwrite").innerText = "0";
+      document.getElementById("sj_memread").innerText = "0";
+      document.getElementById("sj_memwrite").innerText = "0";
+      document.getElementById("sj_branch").innerText = "0";
+
+      // Actualizar PC en el input
+      document.getElementById("pc_actual_j").value = destino;
+
+      // Mostrar traza paso a paso
+      const textoDiv = document.getElementById("texto-explicacion-j");
       textoDiv.style.display = "block";
       textoDiv.innerHTML = `
         <h4 style="color: #1e293b; margin-bottom: 0.5rem;">⚡ Traza de Ejecución en el Datapath:</h4>
         <ol style="padding-left: 1.2rem; margin: 0;">
-          <li>La <strong>Unidad de Control</strong> interpreta la instrucción de Tipo R y establece <code>RegDst = 1</code>, <code>ALUSrc = 0</code> y <code>RegWrite = 1</code>.</li>
-          <li>El <strong>Banco de Registros</strong> entrega los datos: <code>$rs = ${rs}</code> y <code>$rt = ${rt}</code>.</li>
-          <li>Dado que <code>ALUSrc = 0</code>, la <strong>ALU</strong> recibe directamente <code>$rs</code> y <code>$rt</code> como operandos.</li>
-          <li>La <strong>ALU</strong> ${nombreOp} los valores (<code>${rs}</code> y <code>${rt}</code>) dando un resultado de <strong>${resultadoALU}</strong>.</li>
-          <li>Como <code>MemToReg = 0</code>, el resultado pasa directo sin consultar la Memoria de Datos.</li>
-          <li>El resultado final <strong>${resultadoALU}</strong> se escribe correctamente en el registro de destino <strong>${rd}</strong>.</li>
+          <li>La <strong>Unidad de Control</strong> decodifica <code>opcode = 0x02</code> y activa <code>Jump = 1</code>, apagando escritura en registros (<code>RegWrite = 0</code>) y memoria (<code>MemWrite = 0</code>).</li>
+          <li>Los 26 bits del índice (valor <code>${indice26}</code>) se desplazan 2 bits a la izquierda (<code>× 4</code>) formando la dirección alineada <strong>${destino}</strong>.</li>
+          <li>Se concatenan los 4 bits superiores de <code>PC + 4</code> con los 28 bits calculados.</li>
+          <li>La ruta superior de salto actualiza directamente el <strong>PC</strong> de <code>${pcActual}</code> a <strong>${destino}</strong> sin pasar por la ALU.</li>
         </ol>
       `;
     }

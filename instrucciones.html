@@ -131,24 +131,108 @@
       </div>
     </div>
 
-    <!-- SW & LW (Memoria) -->
+    <!-- ADDI -->
     <div class="instruction-card">
       <div class="card-header" onclick="toggleCard(this)">
-        <span>SW / LW - Acceso a Memoria (Store / Load Word)</span>
+        <span>ADDI - Suma Inmediata</span>
         <span class="badge">Tipo I</span>
       </div>
       <div class="card-body">
-        <p><strong>SW:</strong> Guarda el valor de un registro en la memoria de datos.</p>
-        <p><strong>LW:</strong> Lee un valor de la memoria de datos y lo carga en un registro.</p>
+        <p><strong>Fórmula:</strong> R[rt] = R[rs] + SignExtImm</p>
+        <p>Suma el valor del registro <code>$rs</code> con una constante inmediata (<code>imm</code>) y guarda el resultado en <code>$rt</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="addi-rs" value="10"></label>
+            <label>Inmediato (imm): <input type="number" id="addi-imm" value="25"></label>
+            <button class="btn-sim" onclick="runADDI()">Ejecutar ADDI</button>
+          </div>
+          <div class="result-box" id="addi-res">Resultado $rt: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORI -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>ORI - OR Inmediato</span>
+        <span class="badge">Tipo I</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rt] = R[rs] | ZeroExtImm</p>
+        <p>Realiza una operación lógica OR bit a bit entre el registro <code>$rs</code> y un valor inmediato de 16 bits, guardando el resultado en <code>$rt</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="ori-rs" value="12"></label>
+            <label>Inmediato (imm): <input type="number" id="ori-imm" value="3"></label>
+            <button class="btn-sim" onclick="runORI()">Ejecutar ORI</button>
+          </div>
+          <div class="result-box" id="ori-res">Resultado $rt: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEQ -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>BEQ - Branch on Equal (Salto Condicional)</span>
+        <span class="badge">Tipo I</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> if (R[rs] == R[rt]) PC = PC + 4 + BranchAddr</p>
+        <p>Compara los registros <code>$rs</code> y <code>$rt</code>; si son iguales, salta a la dirección destino; si no, continúa con la siguiente instrucción (<code>PC + 4</code>).</p>
+        <div class="demo-box">
+          <h4> Simulación JavaScript:</h4>
+          <div class="inputs-group">
+            <label>$rs: <input type="number" id="beq-rs" value="15"></label>
+            <label>$rt: <input type="number" id="beq-rt" value="15"></label>
+            <label>PC Actual: <input type="number" id="beq-pc" value="100"></label>
+            <label>Dirección Salto: <input type="number" id="beq-target" value="200"></label>
+            <button class="btn-sim" onclick="runBEQ()">Ejecutar BEQ</button>
+          </div>
+          <div class="result-box" id="beq-res">Estado del Salto: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SW  -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>SW - Store Word (Guardar Palabra)</span>
+        <span class="badge">Tipo I</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> M[R[rs] + SignExtImm] = R[rt]</p>
+        <p>Guarda el valor del registro <code>$rt</code> en la dirección de memoria RAM especificada.</p>
         <div class="demo-box">
           <h4> Simulación de Memoria:</h4>
           <div class="inputs-group">
-            <label>Valor a Guardar: <input type="number" id="mem-val" value="99"></label>
-            <label>Dirección RAM: <input type="number" id="mem-addr" value="4"></label>
-            <button class="btn-sim" onclick="runSW()">Ejecutar SW (Escribir RAM)</button>
-            <button class="btn-sim" style="background:#6366f1" onclick="runLW()">Ejecutar LW (Leer RAM)</button>
+            <label>Valor ($rt): <input type="number" id="sw-val" value="99"></label>
+            <label>Dirección RAM: <input type="number" id="sw-addr" value="4"></label>
+            <button class="btn-sim" onclick="runSW()">Ejecutar SW</button>
           </div>
-          <div class="result-box" id="mem-res">Estado RAM: [Dirección 4: 0]</div>
+          <div class="result-box" id="sw-res">Estado RAM: [Dirección 4: 0]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LW  -->
+    <div class="instruction-card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <span>LW - Load Word (Cargar Palabra)</span>
+        <span class="badge">Tipo I</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Fórmula:</strong> R[rt] = M[R[rs] + SignExtImm]</p>
+        <p>Lee un dato almacenado en la memoria RAM y lo carga en el registro destino <code>$rt</code>.</p>
+        <div class="demo-box">
+          <h4> Simulación de Memoria:</h4>
+          <div class="inputs-group">
+            <label>Dirección RAM: <input type="number" id="lw-addr" value="4"></label>
+            <button class="btn-sim" style="background:#6366f1" onclick="runLW()">Ejecutar LW</button>
+          </div>
+          <div class="result-box" id="lw-res">Resultado $rt: --</div>
         </div>
       </div>
     </div>
@@ -208,14 +292,11 @@
 
   <script>
     // Control visual de despliegue
-   function toggleCard(headerEl) {
-  // Alterna la clase morada en el encabezado
-  headerEl.classList.toggle('active');
-  
-  // Alterna la animación de apertura en el cuerpo
-  const body = headerEl.nextElementSibling;
-  body.classList.toggle('open');
-}
+    function toggleCard(headerEl) {
+      headerEl.classList.toggle('active');
+      const body = headerEl.nextElementSibling;
+      body.classList.toggle('open');
+    }
 
     // --- LÓGICA DE SIMULACIÓN EN JS ---
     function runADD() {
@@ -251,19 +332,45 @@
       document.getElementById('slt-res').innerText = `Resultado $rd: ${res} (${rs} < ${rt})`;
     }
 
-    // Objeto simulado de Memoria RAM
+    function runADDI() {
+      const rs = Number(document.getElementById('addi-rs').value);
+      const imm = Number(document.getElementById('addi-imm').value);
+      document.getElementById('addi-res').innerText = `Resultado $rt: ${rs + imm}`;
+    }
+
+    function runORI() {
+      const rs = Number(document.getElementById('ori-rs').value);
+      const imm = Number(document.getElementById('ori-imm').value);
+      const res = rs | imm;
+      document.getElementById('ori-res').innerText = `Resultado $rt: ${res} (Binario: ${(res >>> 0).toString(2).padStart(8, '0')})`;
+    }
+
+    function runBEQ() {
+      const rs = Number(document.getElementById('beq-rs').value);
+      const rt = Number(document.getElementById('beq-rt').value);
+      const pc = Number(document.getElementById('beq-pc').value);
+      const target = Number(document.getElementById('beq-target').value);
+
+      if (rs === rt) {
+        document.getElementById('beq-res').innerText = `Salto TOMADO (${rs} == ${rt}) ➔ Nuevo PC: ${target}`;
+      } else {
+        document.getElementById('beq-res').innerText = `Salto NO tomado (${rs} != ${rt}) ➔ Siguiente PC: ${pc + 4}`;
+      }
+    }
+
+    // Memoria RAM compartida entre SW y LW (sin duplicar)
     const memory = {};
     function runSW() {
-      const val = Number(document.getElementById('mem-val').value);
-      const addr = Number(document.getElementById('mem-addr').value);
+      const val = Number(document.getElementById('sw-val').value);
+      const addr = Number(document.getElementById('sw-addr').value);
       memory[addr] = val;
-      document.getElementById('mem-res').innerText = `SW Exitoso: Dirección RAM[${addr}] = ${val}`;
+      document.getElementById('sw-res').innerText = `SW Exitoso: RAM[${addr}] = ${val}`;
     }
 
     function runLW() {
-      const addr = Number(document.getElementById('mem-addr').value);
+      const addr = Number(document.getElementById('lw-addr').value);
       const val = memory[addr] !== undefined ? memory[addr] : 0;
-      document.getElementById('mem-res').innerText = `LW Exitoso: Se leyó el valor ${val} desde RAM[${addr}]`;
+      document.getElementById('lw-res').innerText = `LW Exitoso: $rt = ${val} (leído desde RAM[${addr}])`;
     }
 
     function runJUMP() {
@@ -272,5 +379,6 @@
       document.getElementById('j-res').innerText = `¡Salto realizado! El nuevo Contador de Programa (PC) es ${target}`;
     }
   </script>
+
 </body>
 </html>

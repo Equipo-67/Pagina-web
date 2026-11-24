@@ -1,4 +1,4 @@
-/* --- RESET & VARIABLES GLOBALES --- */
+/* --- Estilos.css --- */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,19 +11,17 @@ body {
   color: #334155;
   line-height: 1.6;
 }
-/* Centrado para secciones o tarjetas específicas */
+
 .text-center {
   text-align: center;
 }
 
-/* Contenedor para centrar el botón */
 .btn-container {
   display: flex;
   justify-content: center;
   margin-top: 1.5rem;
 }
 
-/* Quita el subrayado del enlace del logo */
 .navbar a {
   text-decoration: none;
 }
@@ -36,12 +34,10 @@ body {
   transition: opacity 0.2s ease;
 }
 
-/* Efecto al pasar el cursor sobre el logo */
 .navbar a:hover .logo {
   opacity: 0.85;
 }
 
-/* --- NAVEGACIÓN --- */
 .navbar {
   background-color: #1e293b;
   padding: 1rem 2rem;
@@ -73,7 +69,6 @@ body {
   color: #38bdf8;
 }
 
-/* --- CONTENEDORES & MAQUETACIÓN --- */
 .container {
   max-width: 900px;
   margin: 2rem auto;
@@ -115,7 +110,6 @@ body {
   padding-bottom: 0.5rem;
 }
 
-/* --- TARJETAS DESPLEGABLES (ACORDEÓN) --- */
 .instruction-card {
   background: white;
   border-radius: 8px;
@@ -125,7 +119,7 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 .card-header {
-  background: #2563eb; /* Azul original */
+  background: #2563eb; 
   color: white;
   padding: 1rem 1.25rem;
   cursor: pointer;
@@ -134,15 +128,15 @@ body {
   justify-content: space-between;
   align-items: center;
   user-select: none;
-  transition: background-color 0.3s ease; /* Transición para el cambio de color */
+  transition: background-color 0.3s ease; 
 }
 
 .card-header.active {
-  background-color: #7c3aed; /* Morado moderno */
+  background-color: #7c3aed; 
 }
 
 .card-header.active:hover {
-  background-color: #6d28d9; /* Morado un poco más oscuro al pasar el cursor */
+  background-color: #6d28d9; 
 }
 
 .card-header:hover {
@@ -167,13 +161,12 @@ body {
 }
 
 .card-body.open {
-  max-height: 500px; /* Altura máxima suficiente para desplegar el contenido */
+  max-height: 500px; 
   opacity: 1;
   padding: 1.25rem;
   border-top-color: #e2e8f0;
 }
 
-/* --- SIMULADOR INTERACTIVO (DEMO BOX) --- */
 .demo-box {
   background: #f8fafc;
   border: 1px solid #cbd5e1;
@@ -246,7 +239,6 @@ body {
   background: #1d4ed8;
 }
 
-/* Corrección de alineación para la tabla de especificaciones */
 .specs-table {
   width: 100%;
   border-collapse: collapse;
@@ -256,54 +248,49 @@ body {
 .specs-table th, 
 .specs-table td {
   padding: 0.75rem 1rem;
-  text-align: left;           /* Alinea todo el texto a la izquierda */
-  vertical-align: top;        /* Alinea el contenido arriba si hay varias líneas */
+  text-align: left;           
+  vertical-align: top;        
   border-bottom: 1px solid #e2e8f0;
 }
 
-/* Define anchos fijos para que las columnas no se desplacen */
 .specs-table th:first-child,
 .specs-table td:first-child {
-  width: 35%;                 /* Ancho fijo para la columna Parámetro */
+  width: 35%;                
   font-weight: 600;
-  white-space: nowrap;        /* Evita que los nombres de parámetros se rompan feo */
+  white-space: nowrap;        
 }
 
 .specs-table th:last-child,
 .specs-table td:last-child {
-  width: 65%;                 /* Ancho para la columna Detalle */
+  width: 65%;                
 }
 
-/* Botón Secundario / Más Pequeño */
 .btn-secondary {
   display: inline-block;
   background-color: transparent;
   color: #2563eb;
   border: 1px solid #2563eb;
-  padding: 0.4rem 0.8rem;      /* Menos relleno (más compacto) */
-  font-size: 0.85rem;           /* Texto más pequeño */
+  padding: 0.4rem 0.8rem;     
+  font-size: 0.85rem;          
   font-weight: 600;
   border-radius: 6px;
   text-decoration: none;
   transition: all 0.2s ease;
-  align-self: center;       /* Alinea el botón al inicio del contenedor */
+  align-self: center;       
 }
 
-/* Efecto Hover para el Botón Secundario */
 .btn-secondary:hover {
   background-color: #2563eb;
   color: #ffffff;
   box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
-/* Contenedor de botón alineado a la izquierda dentro de subsecciones */
 .btn-container-left {
   display: flex;
   justify-content: flex-start;
   margin-top: 0.75rem;
 }
 
-/* --- POP-UP / MODAL DE MINI DIAPOSITIVAS --- */
 dialog.slide-modal {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -312,12 +299,11 @@ dialog.slide-modal {
   width: 90%;
   max-width: 560px;
   padding: 0;
-  margin: auto; /* Centra el diálogo en pantalla */
+  margin: auto; 
   box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.25);
   animation: modalZoom 0.22s ease-out;
 }
 
-/* Fondo difuminado oscuro detrás de la diapositiva */
 dialog.slide-modal::backdrop {
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(3px);
@@ -328,7 +314,6 @@ dialog.slide-modal::backdrop {
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Encabezado igual a tus tarjetas */
 .slide-modal-header {
   background-color: #1e293b;
   color: #ffffff;
@@ -357,7 +342,6 @@ dialog.slide-modal::backdrop {
   color: #38bdf8;
 }
 
-/* Contenido de cada diapositiva */
 .slide-modal-body {
   padding: 2rem 1.5rem;
   min-height: 190px;
@@ -386,7 +370,6 @@ dialog.slide-modal::backdrop {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Pie con botones Anterior / Siguiente */
 .slide-modal-footer {
   background-color: #f8fafc;
   border-top: 1px solid #e2e8f0;
@@ -457,7 +440,7 @@ dialog.conclusion-modal::backdrop {
 }
 
 .conclusion-contenido {
-  min-height: 190px; /* Mantiene fijo el tamaño del cuadro al navegar */
+  min-height: 190px; 
   padding: 0.5rem 0;
 }
 
@@ -470,7 +453,7 @@ dialog.conclusion-modal::backdrop {
 .conclusion-contenido p {
   color: #334155;
   line-height: 1.65;
-  margin-bottom: 1rem; /* Separación clara entre párrafos */
+  margin-bottom: 1rem; 
   text-align: justify;
 }
 
@@ -499,4 +482,101 @@ dialog.conclusion-modal::backdrop {
 .btn-nav-conc:disabled {
   background-color: #cbd5e1;
   cursor: not-allowed;
+}
+
+.isa-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.5rem 0;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background-color: #ffffff;
+}
+
+.isa-table th {
+  background-color: #e2e8f0;
+  color: #0f172a;
+  font-weight: 700;
+  text-align: left;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #94a3b8;
+}
+
+.isa-table td {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #94a3b8;
+  vertical-align: middle;
+}
+
+.isa-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.isa-type {
+  font-weight: 600;
+  color: #475569;
+  margin-right: 0.5rem;
+}
+
+.isa-code {
+  font-family: 'Consolas', monospace;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* --- ANIMACIÓN DE FLUJO EN EL DATAPATH INDIVIDUAL --- */
+.mini-datapath-svg {
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.dp-box {
+  fill: #ffffff;
+  stroke: #475569;
+  stroke-width: 2;
+  rx: 6;
+}
+
+.dp-box.active-block {
+  stroke: #2563eb;
+  fill: #eff6ff;
+  transition: all 0.3s ease;
+}
+
+.dp-label {
+  fill: #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.dp-wire {
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 2.5;
+}
+
+.dp-wire.flowing {
+  stroke: #10b981;
+  stroke-width: 3.5;
+  stroke-dasharray: 8 4;
+  animation: flujoDatos 0.8s linear infinite;
+}
+
+.dp-data-tag {
+  fill: #047857;
+  font-family: 'Consolas', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  text-anchor: middle;
+}
+
+@keyframes flujoDatos {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
 }

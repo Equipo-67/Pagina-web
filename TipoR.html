@@ -1,4 +1,4 @@
-<!-- InstruccionesR.html -->
+<!-- TipoR.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +6,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flujo de Datos - Tipo R (MIPS32)</title>
   <link rel="stylesheet" href="estilos.css">
+  <style>
+    /* Estilos de la tabla de instrucciones */
+    .isa-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem 0;
+      font-size: 0.95rem;
+      color: #1e293b;
+      background-color: #ffffff;
+    }
+    .isa-table th {
+      background-color: #e2e8f0;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid #94a3b8;
+    }
+    .isa-table td {
+      padding: 0.65rem 0.9rem;
+      border: 1px solid #94a3b8;
+      vertical-align: middle;
+    }
+    .isa-table tr:hover {
+      background-color: #f8fafc;
+    }
+    .isa-type {
+      font-weight: 600;
+      color: #475569;
+      margin-right: 0.5rem;
+    }
+    .isa-code {
+      font-family: 'Consolas', monospace;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* Estilos y animación del diagrama SVG */
+    .mini-datapath-svg {
+      width: 100%;
+      max-width: 720px;
+      height: auto;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+    .dp-box {
+      fill: #ffffff;
+      stroke: #475569;
+      stroke-width: 2;
+      rx: 6;
+    }
+    .dp-box.active-block {
+      stroke: #2563eb;
+      fill: #eff6ff;
+      transition: all 0.3s ease;
+    }
+    .dp-label {
+      fill: #0f172a;
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+    .dp-wire {
+      fill: none;
+      stroke: #94a3b8;
+      stroke-width: 2.5;
+    }
+    .dp-wire.flowing {
+      stroke: #10b981;
+      stroke-width: 3.5;
+      stroke-dasharray: 8 4;
+      animation: flujoDatos 0.8s linear infinite;
+    }
+    .dp-data-tag {
+      fill: #047857;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      font-weight: bold;
+      text-anchor: middle;
+    }
+    @keyframes flujoDatos {
+      from { stroke-dashoffset: 24; }
+      to   { stroke-dashoffset: 0; }
+    }
+  </style>
 </head>
 <body>
 
@@ -26,15 +113,93 @@
   <div class="container">
     <section class="hero">
       <h1>Simulación de Flujo de Datos: Tipo R</h1>
-      <p>Visualiza cómo viajan los datos y qué señales de control se activan en la arquitectura MIPS32.</p>
+      <p>Observa cómo viajan los datos por la ruta de hardware (Datapath) y qué señales de control se activan en las operaciones entre registros antes de ejecutar un programa completo.</p>
     </section>
 
+    <!-- Tabla de referencia rápida -->
     <div class="card-section">
-      <h2>🗺️ Mapa del Datapath (Tipo R)</h2>
+      <h2>📋 Conjunto de Instrucciones Tipo R</h2>
+      <p>Realizan operaciones aritméticas y lógicas utilizando dos registros fuente (<code>$rs</code>, <code>$rt</code>), calculando en la ALU y escribiendo el resultado en un registro destino (<code>$rd</code>).</p>
 
-      <!-- Imagen con marco y responsiva -->
+      <table class="isa-table">
+        <thead>
+          <tr>
+            <th>Tipo y sintaxis</th>
+            <th>Opcode / funct (hex)</th>
+            <th>Operación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="isa-type">R</span> <span class="isa-code">add $rd, $rs, $rt</span></td>
+            <td class="isa-code">00 / 21</td>
+            <td>Suma módulo 2³².</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">R</span> <span class="isa-code">sub $rd, $rs, $rt</span></td>
+            <td class="isa-code">00 / 23</td>
+            <td>Resta módulo 2³².</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">R</span> <span class="isa-code">and $rd, $rs, $rt</span></td>
+            <td class="isa-code">00 / 24</td>
+            <td>AND bit a bit.</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">R</span> <span class="isa-code">or $rd, $rs, $rt</span></td>
+            <td class="isa-code">00 / 25</td>
+            <td>OR bit a bit.</td>
+          </tr>
+          <tr>
+            <td><span class="isa-type">R</span> <span class="isa-code">slt $rd, $rs, $rt</span></td>
+            <td class="isa-code">00 / 2A</td>
+            <td>Escribe 1 si rs &lt; rt con signo, o 0.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mapa Animado y Simulación -->
+    <div class="card-section">
+      <h2>🗺️ Mapa del Datapath Animado (Tipo R)</h2>
+
       <div class="bit-format" style="text-align: center;">
-        <img src="Imagenes/TipoR.png" class="imagen-instruccion" alt="Ruta destacada Tipo R" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <svg viewBox="0 0 680 210" class="mini-datapath-svg">
+          <defs>
+            <marker id="flecha-gris" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+            </marker>
+            <marker id="flecha-verde" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+            </marker>
+          </defs>
+
+          <!-- Bloques de Hardware -->
+          <rect id="blk-inst" x="20" y="65" width="110" height="75" class="dp-box"/>
+          <text x="75" y="100" class="dp-label">Instrucción</text>
+          <text x="75" y="116" class="dp-label" style="font-size:11px; fill:#64748b;">(32 bits)</text>
+
+          <rect id="blk-regs" x="200" y="45" width="130" height="115" class="dp-box"/>
+          <text x="265" y="100" class="dp-label">Banco de</text>
+          <text x="265" y="116" class="dp-label">Registros</text>
+
+          <polygon id="blk-alu" points="420,55 495,82 495,132 420,160 420,120 438,107 420,95" class="dp-box"/>
+          <text x="462" y="112" class="dp-label">ALU</text>
+
+          <!-- Cables -->
+          <path id="wire-r1" d="M 130 85 L 200 85" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <path id="wire-r2" d="M 130 120 L 200 120" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <path id="wire-alu1" d="M 330 78 L 420 78" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <path id="wire-alu2" d="M 330 135 L 420 135" class="dp-wire" marker-end="url(#flecha-gris)"/>
+          <path id="wire-wb" d="M 495 107 L 565 107 L 565 190 L 175 190 L 175 142 L 200 142" class="dp-wire" marker-end="url(#flecha-gris)"/>
+
+          <!-- Etiquetas dinámicas con valores en movimiento -->
+          <text id="tag-rs-name" x="165" y="77" class="dp-data-tag"></text>
+          <text id="tag-rt-name" x="165" y="112" class="dp-data-tag"></text>
+          <text id="tag-val-a" x="375" y="70" class="dp-data-tag"></text>
+          <text id="tag-val-b" x="375" y="127" class="dp-data-tag"></text>
+          <text id="tag-res" x="375" y="182" class="dp-data-tag"></text>
+        </svg>
       </div>
       
       <!-- Panel de Controles / Entradas -->
@@ -44,8 +209,11 @@
         <div class="inputs-group">
           <label>Operación:
             <select id="operacion" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #cbd5e1;">
-              <option value="suma">ADD (Suma)</option>
-              <option value="resta">SUB (Resta)</option>
+              <option value="add">ADD (Suma)</option>
+              <option value="sub">SUB (Resta)</option>
+              <option value="and">AND (Y Lógica)</option>
+              <option value="or">OR (O Lógica)</option>
+              <option value="slt">SLT (Menor que)</option>
             </select>
           </label>
 
@@ -94,10 +262,12 @@
         </div>
 
         <!-- Resultado y Explicación Dinámica -->
-        <div id="texto-explicacion" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;">
-          <!-- Se inyecta el texto descriptivo en JS -->
-        </div>
+        <div id="texto-explicacion" class="result-box" style="display: none; margin-top: 1rem; line-height: 1.7; font-family: inherit;"></div>
+      </div>
 
+      <!-- Enlace hacia el simulador unificado -->
+      <div class="btn-container" style="margin-top: 1.5rem;">
+        <a href="instrucciones.html" class="btn-secondary">⬅ Volver a Instrucciones & Simulación Completa</a>
       </div>
     </div>
   </div>
@@ -113,16 +283,48 @@
       // 2. Cálculo en la ALU
       let resultadoALU = 0;
       let nombreOp = "";
-      
-      if (operacion === "suma") {
+      let functHex = "21";
+
+      if (operacion === "add") {
         resultadoALU = rs + rt;
         nombreOp = "sumó";
-      } else {
+        functHex = "21";
+      } else if (operacion === "sub") {
         resultadoALU = rs - rt;
         nombreOp = "restó";
+        functHex = "23";
+      } else if (operacion === "and") {
+        resultadoALU = rs & rt;
+        nombreOp = "aplicó AND bit a bit a";
+        functHex = "24";
+      } else if (operacion === "or") {
+        resultadoALU = rs | rt;
+        nombreOp = "aplicó OR bit a bit a";
+        functHex = "25";
+      } else if (operacion === "slt") {
+        resultadoALU = (rs < rt) ? 1 : 0;
+        nombreOp = "comparó (rs < rt) entre";
+        functHex = "2A";
       }
 
-      // 3. Actualizar tabla de señales de control
+      // 3. Animar bloques y cables del SVG
+      ["blk-inst", "blk-regs", "blk-alu"].forEach(id => {
+        document.getElementById(id).classList.add("active-block");
+      });
+      ["wire-r1", "wire-r2", "wire-alu1", "wire-alu2", "wire-wb"].forEach(id => {
+        const w = document.getElementById(id);
+        w.classList.add("flowing");
+        w.setAttribute("marker-end", "url(#flecha-verde)");
+      });
+
+      // Mostrar valores viajando por los cables
+      document.getElementById("tag-rs-name").textContent = "rs";
+      document.getElementById("tag-rt-name").textContent = "rt";
+      document.getElementById("tag-val-a").textContent = rs;
+      document.getElementById("tag-val-b").textContent = rt;
+      document.getElementById("tag-res").textContent = `${rd} = ${resultadoALU}`;
+
+      // 4. Actualizar tabla de señales de control
       document.getElementById("s_regdst").innerText = "1 (rd)";
       document.getElementById("s_alusrc").innerText = "0 (rt)";
       document.getElementById("s_memtoreg").innerText = "0 (ALU)";
@@ -131,18 +333,17 @@
       document.getElementById("s_memwrite").innerText = "0";
       document.getElementById("s_branch").innerText = "0";
 
-      // 4. Mostrar explicación del flujo paso a paso
+      // 5. Mostrar explicación del flujo paso a paso
       const textoDiv = document.getElementById("texto-explicacion");
       textoDiv.style.display = "block";
       textoDiv.innerHTML = `
         <h4 style="color: #1e293b; margin-bottom: 0.5rem;">⚡ Traza de Ejecución en el Datapath:</h4>
         <ol style="padding-left: 1.2rem; margin: 0;">
-          <li>La <strong>Unidad de Control</strong> interpreta la instrucción de Tipo R y establece <code>RegDst = 1</code>, <code>ALUSrc = 0</code> y <code>RegWrite = 1</code>.</li>
-          <li>El <strong>Banco de Registros</strong> entrega los datos: <code>$rs = ${rs}</code> y <code>$rt = ${rt}</code>.</li>
+          <li>La <strong>Unidad de Control</strong> lee <code>opcode = 0x00</code> y <code>funct = 0x${functHex}</code>, activando <code>RegDst = 1</code>, <code>ALUSrc = 0</code> y <code>RegWrite = 1</code>.</li>
+          <li>El <strong>Banco de Registros</strong> entrega los operandos: <code>$rs = ${rs}</code> y <code>$rt = ${rt}</code>.</li>
           <li>Dado que <code>ALUSrc = 0</code>, la <strong>ALU</strong> recibe directamente <code>$rs</code> y <code>$rt</code> como operandos.</li>
           <li>La <strong>ALU</strong> ${nombreOp} los valores (<code>${rs}</code> y <code>${rt}</code>) dando un resultado de <strong>${resultadoALU}</strong>.</li>
-          <li>Como <code>MemToReg = 0</code>, el resultado pasa directo sin consultar la Memoria de Datos.</li>
-          <li>El resultado final <strong>${resultadoALU}</strong> se escribe correctamente en el registro de destino <strong>${rd}</strong>.</li>
+          <li>Como <code>MemToReg = 0</code>, el resultado pasa directo sin consultar la Memoria de Datos y se escribe en el registro de destino <strong>${rd}</strong>.</li>
         </ol>
       `;
     }
