@@ -107,6 +107,7 @@
       <li><a href="instrucciones.html">Instrucciones & Simulación</a></li>
       <li><a href="TipoR.html"> Tipo R </a></li>
       <li><a href="TipoJ.html"> Tipo J </a></li>
+      <li><a href="simulador_mips.html"> Simulador MIPS </a></li>
     </ul>
   </nav>
 
@@ -119,7 +120,7 @@
     <!-- Tabla de referencia rápida -->
     <div class="card-section">
       <h2>📋 Conjunto de Instrucciones Tipo I</h2>
-      <p>Operan utilizando un registro fuente (<code>$rs</code>) y un valor constante o desplazamiento de 16 bits (<code>#imm</code> / <code>#desp</code>)[cite: 2].</p>
+      <p>Operan utilizando un registro fuente (<code>$rs</code>) y un valor constante o desplazamiento de 16 bits (<code>#imm</code> / <code>#desp</code>).</p>
 
       <table class="isa-table">
         <thead>
@@ -133,27 +134,27 @@
           <tr>
             <td><span class="isa-type">I</span> <span class="isa-code">addi $rt, $rs, #imm</span></td>
             <td class="isa-code">09</td>
-            <td>Suma módulo 2³² con inmediato extendido con signo.[cite: 6]</td>
+            <td>Suma módulo 2³² con inmediato extendido con signo.</td>
           </tr>
           <tr>
             <td><span class="isa-type">I</span> <span class="isa-code">ori $rt, $rs, #imm</span></td>
             <td class="isa-code">0D</td>
-            <td>OR con inmediato extendido con ceros.[cite: 6]</td>
+            <td>OR con inmediato extendido con ceros.</td>
           </tr>
           <tr>
             <td><span class="isa-type">I</span> <span class="isa-code">lw $rt, #desp($rs)</span></td>
             <td class="isa-code">23</td>
-            <td>Carga una palabra de 32 bits en rt.[cite: 6]</td>
+            <td>Carga una palabra de 32 bits en rt.</td>
           </tr>
           <tr>
             <td><span class="isa-type">I</span> <span class="isa-code">sw $rt, #desp($rs)</span></td>
             <td class="isa-code">2B</td>
-            <td>Guarda la palabra de rt en memoria.[cite: 6]</td>
+            <td>Guarda la palabra de rt en memoria.</td>
           </tr>
           <tr>
             <td><span class="isa-type">I</span> <span class="isa-code">beq $rs, $rt, #etiqueta</span></td>
             <td class="isa-code">04</td>
-            <td>Toma el salto si rs = rt.[cite: 6]</td>
+            <td>Toma el salto si rs = rt.</td>
           </tr>
         </tbody>
       </table>

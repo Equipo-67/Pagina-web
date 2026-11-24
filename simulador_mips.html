@@ -51,7 +51,7 @@
 
   /* Left Panel: Editor & IMEM */
   textarea { width: 100%; height: 155px; background: var(--bg-card); color: #a5f3fc; border: 1px solid var(--border); border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; font-size: 12px; resize: none; line-height: 1.4; }
-  .error-box { color: #f87171; font-size: 11px; margin-top: 4px; min-height: 16px; }
+  .error-box { color: #f87171; font-size: 11px; margin-top: 4px; min-height: 16px; white-space: pre-line; }
   table { width: 100%; border-collapse: collapse; font-family: 'Consolas', monospace; font-size: 11px; }
   th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid var(--border); }
   th { background: var(--bg-card); color: var(--text-muted); position: sticky; top: 0; }
@@ -103,7 +103,10 @@
   <h1>⚙️ Simulador Microprocesador MIPS (Ruta de Datos Completa)</h1>
   <div class="controls">
     <select id="presetSelect" onchange="loadPreset()">
-      <option value="mips101">Programa: MIPS 101 (Suma de Arreglo)</option>
+      <option value="sort1">Algoritmo: ordenamiento por selección (entrada 1)</option>
+    <option value="sort2">Algoritmo: ordenamiento por selección (entrada 2, descendente)</option>
+    <option value="sort3">Algoritmo: ordenamiento por selección (entrada 3, iguales)</option>
+    <option value="mips101">Programa: MIPS 101 (Suma de Arreglo)</option>
       <option value="typeR">Prueba Rápida: Tipo R (add, sub, and, or, slt)</option>
       <option value="typeI">Prueba Rápida: Tipo I (addi, lw, sw, beq)</option>
       <option value="typeJ">Prueba Rápida: Tipo J (Salto incondicional j)</option>
@@ -112,6 +115,8 @@
     <button class="btn-stage" onclick="stepStage()">2. Avanzar Etapa</button>
     <button class="btn-inst" onclick="stepInstruction()">3. Avanzar Instrucción</button>
     <button class="btn-reset" onclick="resetCPU()">Reiniciar</button>
+    <button onclick="downloadImage()">Imagen .hex</button>
+    <a href="index.html" style="color:#38bdf8;font-size:12px;">← Reporte</a>
   </div>
 </header>
 
@@ -344,6 +349,7 @@
   </div>
 </div>
 
+<script src="SRC/assembler.js"></script>
 <script>
 // ==================== CONSTANTES Y PRESETS MIPS ====================
 const REG_NAMES = [
@@ -354,6 +360,118 @@ const REG_NAMES = [
 ];
 
 const PRESETS = {
+  sort1: `# Ordenamiento por selección (ascendente) de 8 palabras en memoria de datos
+# Pseudocódigo:
+#   para i = 0 hasta n-2:
+#     min = i
+#     para j = i+1 hasta n-1:
+#       si A[j] < A[min]: min = j
+#     intercambiar A[i] y A[min]
+# Registros: s0=fin del arreglo en bytes (32), s1=último i (28), t0=i, t1=min, t2=j,
+#   t3/t4=valores leídos, t5=resultado de slt, v0=1 al terminar
+# Entrada: arreglo en la dirección 0. Salida: el mismo arreglo ordenado en Mem[0..31]
+.data
+arr: .word 5, -3, 9, 1, 7, 0, 4, -8
+.text
+        addi $s0, $zero, 32
+        addi $s1, $zero, 28
+        addi $t0, $zero, 0
+outer:  beq  $t0, $s1, fin
+        add  $t1, $t0, $zero
+        addi $t2, $t0, 4
+inner:  beq  $t2, $s0, swap
+        lw   $t3, 0($t2)
+        lw   $t4, 0($t1)
+        slt  $t5, $t3, $t4
+        beq  $t5, $zero, next
+        add  $t1, $t2, $zero
+next:   addi $t2, $t2, 4
+        j    inner
+swap:   lw   $t3, 0($t0)
+        lw   $t4, 0($t1)
+        sw   $t4, 0($t0)
+        sw   $t3, 0($t1)
+        addi $t0, $t0, 4
+        j    outer
+fin:    ori  $v0, $zero, 1
+end:    j    end
+`,
+
+  sort2: `# Ordenamiento por selección (ascendente) de 8 palabras en memoria de datos
+# Pseudocódigo:
+#   para i = 0 hasta n-2:
+#     min = i
+#     para j = i+1 hasta n-1:
+#       si A[j] < A[min]: min = j
+#     intercambiar A[i] y A[min]
+# Registros: s0=fin del arreglo en bytes (32), s1=último i (28), t0=i, t1=min, t2=j,
+#   t3/t4=valores leídos, t5=resultado de slt, v0=1 al terminar
+# Entrada: arreglo en la dirección 0. Salida: el mismo arreglo ordenado en Mem[0..31]
+.data
+arr: .word 8, 7, 6, 5, 4, 3, 2, 1
+.text
+        addi $s0, $zero, 32
+        addi $s1, $zero, 28
+        addi $t0, $zero, 0
+outer:  beq  $t0, $s1, fin
+        add  $t1, $t0, $zero
+        addi $t2, $t0, 4
+inner:  beq  $t2, $s0, swap
+        lw   $t3, 0($t2)
+        lw   $t4, 0($t1)
+        slt  $t5, $t3, $t4
+        beq  $t5, $zero, next
+        add  $t1, $t2, $zero
+next:   addi $t2, $t2, 4
+        j    inner
+swap:   lw   $t3, 0($t0)
+        lw   $t4, 0($t1)
+        sw   $t4, 0($t0)
+        sw   $t3, 0($t1)
+        addi $t0, $t0, 4
+        j    outer
+fin:    ori  $v0, $zero, 1
+end:    j    end
+`,
+
+  sort3: `# Ordenamiento por selección (ascendente) de 8 palabras en memoria de datos
+# Pseudocódigo:
+#   para i = 0 hasta n-2:
+#     min = i
+#     para j = i+1 hasta n-1:
+#       si A[j] < A[min]: min = j
+#     intercambiar A[i] y A[min]
+# Registros: s0=fin del arreglo en bytes (32), s1=último i (28), t0=i, t1=min, t2=j,
+#   t3/t4=valores leídos, t5=resultado de slt, v0=1 al terminar
+# Entrada: arreglo en la dirección 0. Salida: el mismo arreglo ordenado en Mem[0..31]
+.data
+arr: .word 4, 4, 4, 4, 4, 4, 4, 4
+.text
+        addi $s0, $zero, 32
+        addi $s1, $zero, 28
+        addi $t0, $zero, 0
+outer:  beq  $t0, $s1, fin
+        add  $t1, $t0, $zero
+        addi $t2, $t0, 4
+inner:  beq  $t2, $s0, swap
+        lw   $t3, 0($t2)
+        lw   $t4, 0($t1)
+        slt  $t5, $t3, $t4
+        beq  $t5, $zero, next
+        add  $t1, $t2, $zero
+next:   addi $t2, $t2, 4
+        j    inner
+swap:   lw   $t3, 0($t0)
+        lw   $t4, 0($t1)
+        sw   $t4, 0($t0)
+        sw   $t3, 0($t1)
+        addi $t0, $t0, 4
+        j    outer
+fin:    ori  $v0, $zero, 1
+end:    j    end
+`,
+
+
   mips101: `# MIPS 101: Programa completo (Suma de arreglo en memoria)
 addi $t0, $zero, 0      # i = 0 (desplazamiento en bytes)
 addi $t1, $zero, 16     # límite = 16 bytes (4 enteros)
@@ -377,7 +495,9 @@ addi $t0, $t0, 4        # i += 4
 j    loop               # repetir ciclo
 
 fin:
-sw   $s0, 16($zero)     # Mem[16] = 100 (Resultado final)`,
+sw   $s0, 16($zero)     # Mem[16] = 100 (Resultado final)
+end:
+j    end                # punto final observable (autosalto)`,
 
   typeR: `# Operaciones Tipo R (Solo usan Banco de Registros y ALU)
 addi $t1, $zero, 12     # $t1 = 12 (0x0C)
@@ -405,7 +525,8 @@ salto_directo:
 addi $t1, $zero, 2      # Continúa ejecución aquí`
 };
 
-const BASE_PC = 0x00400000;
+const BASE_PC = 0;
+const DMEM_SIZE = 64; // bytes (16 palabras)
 
 // ==================== ESTADO DEL PROCESADOR ====================
 let cpu = {
@@ -438,89 +559,14 @@ function parseReg(str) {
 }
 
 function assembleCode() {
-  const rawLines = document.getElementById("asmEditor").value.split("
-");
-  const errorBox = document.getElementById("asmError");
-  errorBox.textContent = "";
-
-  const labels = {};
-  const cleanInsts = [];
-
-  // Pasada 1: Etiquetas
-  rawLines.forEach((raw, idx) => {
-    let line = raw.split("#")[0].trim();
-    if (!line) return;
-    if (line.includes(":")) {
-      const parts = line.split(":");
-      const lbl = parts[0].trim();
-      labels[lbl] = BASE_PC + cleanInsts.length * 4;
-      line = parts[1].trim();
-    }
-    if (line) cleanInsts.push({ text: line, lineNum: idx + 1 });
-  });
-
-  // Pasada 2: Codificación a 32 bits
-  const program = [];
-  try {
-    cleanInsts.forEach((item, idx) => {
-      const addr = BASE_PC + idx * 4;
-      const tokens = item.text.replace(/,/g, " ").replace(/\(/g, " ").replace(/\)/g, " ").trim().split(/\s+/);
-      const op = tokens[0].toLowerCase();
-      let word = 0;
-
-      const rTypeFunct = { add: 0x20, sub: 0x22, and: 0x24, or: 0x25, slt: 0x2A };
-      if (rTypeFunct[op] !== undefined) {
-        const rd = parseReg(tokens[1]);
-        const rs = parseReg(tokens[2]);
-        const rt = parseReg(tokens[3]);
-        word = (0 << 26) | (rs << 21) | (rt << 16) | (rd << 11) | (0 << 6) | rTypeFunct[op];
-      } else if (op === "addi") {
-        const rt = parseReg(tokens[1]);
-        const rs = parseReg(tokens[2]);
-        const imm = parseInt(tokens[3]) & 0xFFFF;
-        word = (0x08 << 26) | (rs << 21) | (rt << 16) | imm;
-      } else if (op === "lw" || op === "sw") {
-        const opcode = op === "lw" ? 0x23 : 0x2B;
-        const rt = parseReg(tokens[1]);
-        const offset = parseInt(tokens[2]) & 0xFFFF;
-        const rs = parseReg(tokens[3]);
-        word = (opcode << 26) | (rs << 21) | (rt << 16) | offset;
-      } else if (op === "beq") {
-        const rs = parseReg(tokens[1]);
-        const rt = parseReg(tokens[2]);
-        const targetAddr = labels[tokens[3]] !== undefined ? labels[tokens[3]] : parseInt(tokens[3]);
-        if (isNaN(targetAddr)) throw new Error(`Etiqueta no encontrada: ${tokens[3]}`);
-        const offset = ((targetAddr - (addr + 4)) >> 2) & 0xFFFF;
-        word = (0x04 << 26) | (rs << 21) | (rt << 16) | offset;
-      } else if (op === "j") {
-        const targetAddr = labels[tokens[1]] !== undefined ? labels[tokens[1]] : parseInt(tokens[1]);
-        if (isNaN(targetAddr)) throw new Error(`Etiqueta no encontrada: ${tokens[1]}`);
-        const target26 = (targetAddr >>> 2) & 0x03FFFFFF;
-        word = (0x02 << 26) | target26;
-      } else {
-        throw new Error(`Instrucción no soportada: ${op}`);
-      }
-
-      word = word >>> 0;
-      const b0 = ((word >>> 24) & 0xFF).toString(16).padStart(2, "0").toUpperCase();
-      const b1 = ((word >>> 16) & 0xFF).toString(16).padStart(2, "0").toUpperCase();
-      const b2 = ((word >>> 8) & 0xFF).toString(16).padStart(2, "0").toUpperCase();
-      const b3 = (word & 0xFF).toString(16).padStart(2, "0").toUpperCase();
-
-      program.push({
-        addr,
-        word,
-        hex: "0x" + word.toString(16).padStart(8, "0").toUpperCase(),
-        bytesStr: `${b0} ${b1} ${b2} ${b3}`,
-        asm: item.text
-      });
-    });
-
-    cpu.imem = program;
-    resetCPU();
-  } catch (e) {
-    errorBox.textContent = "Error de ensamblado: " + e.message;
-  }
+  const A = asmMips(document.getElementById("asmEditor").value);
+  const box = document.getElementById("asmError");
+  if (A.err.length) { box.textContent = A.err.map(e => `Línea ${e.line}: ${e.msg}`).join("\n"); return; }
+  const hx = w => [24, 16, 8, 0].map(s => ((w >>> s) & 255).toString(16).padStart(2, "0").toUpperCase()).join(" ");
+  cpu.imem = A.lst.map(r => ({ addr: r.addr, word: r.w, hex: toHex32(r.w), bytesStr: hx(r.w), asm: r.src }));
+  cpu.ibytes = A.imem;      // imagen: un byte por dirección, big-endian
+  cpu.dataInit = A.dmem;    // datos iniciales (.word)
+  resetCPU();
 }
 
 // ==================== UNIDAD DE CONTROL ====================
@@ -528,13 +574,15 @@ function getControlSignals(opcode, funct) {
   let ctrl = { RegDst: 0, ALUSrc: 0, MemtoReg: 0, RegWrite: 0, MemRead: 0, MemWrite: 0, Branch: 0, Jump: 0, ALUOp: "00" };
   if (opcode === 0x00) { // Tipo R
     ctrl.RegDst = 1; ctrl.RegWrite = 1; ctrl.ALUOp = "10";
-  } else if (opcode === 0x08) { // addi
+  } else if (opcode === 0x09) { // addi / addiu
     ctrl.ALUSrc = 1; ctrl.RegWrite = 1; ctrl.ALUOp = "00";
   } else if (opcode === 0x23) { // lw
     ctrl.ALUSrc = 1; ctrl.MemtoReg = 1; ctrl.RegWrite = 1; ctrl.MemRead = 1; ctrl.ALUOp = "00";
   } else if (opcode === 0x2B) { // sw
     ctrl.ALUSrc = 1; ctrl.MemWrite = 1; ctrl.ALUOp = "00";
-  } else if (opcode === 0x04) { // beq
+  } else if (opcode === 0x0D) { // ori
+    ctrl.ALUSrc = 1; ctrl.RegWrite = 1; ctrl.ALUOp = "11";
+  } else if (opcode === 0x04 || opcode === 0x05) { // beq / bne
     ctrl.Branch = 1; ctrl.ALUOp = "01";
   } else if (opcode === 0x02) { // j
     ctrl.Jump = 1;
@@ -544,13 +592,13 @@ function getControlSignals(opcode, funct) {
 
 // ==================== EJECUCIÓN POR ETAPA ====================
 function stepStage() {
-  if (cpu.imem.length === 0) return;
+  if (cpu.imem.length === 0 || cpu.halted) return;
   const instIndex = (cpu.pc - BASE_PC) / 4;
 
   // Verificar fin de programa en etapa IF
-  if (cpu.stage === 0 && (instIndex < 0 || instIndex >= cpu.imem.length)) {
+  if (cpu.stage === 0 && (cpu.pc % 4 !== 0 || instIndex < 0 || instIndex >= cpu.imem.length)) {
     cpu.halted = true;
-    document.getElementById("asmError").textContent = "✔ Ejecución del programa finalizada.";
+    document.getElementById("asmError").textContent = "⚠ Búsqueda fuera del programa o desalineada (PC=" + toHex32(cpu.pc) + ").";
     return;
   }
   cpu.halted = false;
@@ -560,10 +608,12 @@ function stepStage() {
   if (cpu.stage === 0) {
     // --- ETAPA 1: IF (Instruction Fetch) ---
     const inst = cpu.imem[instIndex];
+    const fb = [0, 1, 2, 3].map(k => cpu.ibytes[cpu.pc + k]);   // 4 bytes de la IMEM
+    const fw = ((fb[0] << 24) | (fb[1] << 16) | (fb[2] << 8) | fb[3]) >>> 0;
     cpu.if_id = {
       pcNext: cpu.pc + 4,
-      word: inst.word,
-      bytesStr: inst.bytesStr,
+      word: fw,
+      bytesStr: fb.map(x => x.toString(16).padStart(2, "0").toUpperCase()).join(" "),
       asm: inst.asm
     };
     cpu.cycles++;
@@ -605,16 +655,18 @@ function stepStage() {
   } else if (cpu.stage === 2) {
     // --- ETAPA 3: EX (Execute / ALU) ---
     const d = cpu.id_ex;
-    const op2 = d.ctrl.ALUSrc ? d.imm : d.valB;
+    const op2 = d.ctrl.ALUSrc ? (d.op === 0x0D ? d.imm16 : d.imm) : d.valB;
     let aluRes = 0;
 
     if (d.ctrl.ALUOp === "00") {
       aluRes = (d.valA + op2) | 0;
     } else if (d.ctrl.ALUOp === "01") {
       aluRes = (d.valA - op2) | 0;
+    } else if (d.ctrl.ALUOp === "11") {
+      aluRes = d.valA | op2;                                  // ori
     } else if (d.ctrl.ALUOp === "10") {
-      if (d.funct === 0x20) aluRes = (d.valA + op2) | 0;       // add
-      else if (d.funct === 0x22) aluRes = (d.valA - op2) | 0;  // sub
+      if (d.funct === 0x21) aluRes = (d.valA + op2) | 0;       // add
+      else if (d.funct === 0x23) aluRes = (d.valA - op2) | 0;  // sub
       else if (d.funct === 0x24) aluRes = d.valA & op2;        // and
       else if (d.funct === 0x25) aluRes = d.valA | op2;        // or
       else if (d.funct === 0x2A) aluRes = (d.valA < op2) ? 1 : 0; // slt
@@ -630,7 +682,7 @@ function stepStage() {
     if (d.ctrl.Jump) {
       nextPC = jumpTarget;
       branchTaken = true;
-    } else if (d.ctrl.Branch && zero === 1) {
+    } else if (d.ctrl.Branch && (d.op === 0x05 ? zero === 0 : zero === 1)) {
       nextPC = branchTarget;
       branchTaken = true;
     }
@@ -646,6 +698,12 @@ function stepStage() {
     // --- ETAPA 4: MEM (Memory Access) ---
     const ex = cpu.ex_mem;
     let memData = 0;
+    if ((ex.ctrl.MemRead || ex.ctrl.MemWrite) && ((ex.aluRes >>> 0) % 4 !== 0 || (ex.aluRes >>> 0) >= DMEM_SIZE)) {
+      cpu.halted = true;
+      document.getElementById("asmError").textContent = "⚠ Acceso a datos inválido en " + toHex32(ex.aluRes) + " (rango o alineación a 4). Sin escritura de registro ni de memoria.";
+      updateUI();
+      return;
+    }
 
     if (ex.ctrl.MemRead) {
       memData = cpu.dmem.get(ex.aluRes) || 0;
@@ -671,6 +729,7 @@ function stepStage() {
       cpu.lastChangedReg = wb.writeReg;
     }
     cpu.regs[0] = 0; // $zero inmutable
+    if (cpu.ex_mem.nextPC === cpu.pc) { cpu.halted = true; document.getElementById("asmError").textContent = "✔ Punto final alcanzado (autosalto en " + toHex32(cpu.pc) + ")."; }
     cpu.pc = cpu.ex_mem.nextPC;
     cpu.instCount++;
     cpu.cycles++;
@@ -693,7 +752,10 @@ function resetCPU() {
   cpu.regs.fill(0);
   cpu.dmem.clear();
   // Inicializar 8 palabras en RAM en 0 para visualización clara
-  for (let i = 0; i <= 24; i += 4) cpu.dmem.set(i, 0);
+  for (let i = 0; i < DMEM_SIZE; i += 4) {
+    const b = cpu.dataInit || [];
+    cpu.dmem.set(i, ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) | 0);
+  }
   cpu.stage = 0;
   cpu.cycles = 0;
   cpu.instCount = 0;
@@ -858,6 +920,13 @@ function loadPreset() {
   const key = document.getElementById("presetSelect").value;
   document.getElementById("asmEditor").value = PRESETS[key];
   assembleCode();
+}
+
+function downloadImage() {
+  if (!cpu.ibytes || !cpu.ibytes.length) return;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([Array.from(cpu.ibytes, b => b.toString(16).padStart(2, "0").toUpperCase()).join("\n")]));
+  a.download = "programa.hex"; a.click();
 }
 
 // Inicialización al cargar
