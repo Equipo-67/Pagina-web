@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo MIPS - Modalidad B</title>
+<style>
+  :root {
+    --bg-dark: #0f172a;
+    --bg-panel: #1e293b;
+    --bg-card: #0b1120;
+    --border: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --active-wire: #10b981;
+    --active-ctrl: #f59e0b;
+    --changed-row: rgba(16, 185, 129, 0.25);
+    --pc-row: rgba(56, 189, 248, 0.2);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: var(--bg-dark); color: var(--text-main); font-size: 13px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  
+  /* Header */
+  header { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 16px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .controls { display: flex; gap: 8px; align-items: center; }
+  button { background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.15s; }
+  button:hover { background: #1d4ed8; }
+  button.btn-stage { background: #059669; }
+  button.btn-stage:hover { background: #047857; }
+  button.btn-inst { background: #0284c7; }
+  button.btn-inst:hover { background: #0369a1; }
+  button.btn-reset { background: #dc2626; }
+  button.btn-reset:hover { background: #b91c1c; }
+  select { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 5px 8px; border-radius: 5px; font-size: 12px; }
+
+  /* Stage Indicator Bar */
+  .stage-bar { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 6px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .stages { display: flex; gap: 6px; }
+  .stage-pill { padding: 4px 12px; border-radius: 12px; background: var(--bg-panel); color: var(--text-muted); font-weight: bold; border: 1px solid var(--border); }
+  .stage-pill.active { background: var(--active-wire); color: #022c22; border-color: #34d399; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+  .status-info { display: flex; gap: 16px; font-family: monospace; font-size: 13px; }
+  .status-info span b { color: var(--accent); }
+
+  /* Main Grid Layout */
+  .workspace { display: grid; grid-template-columns: 310px 1fr 270px; gap: 8px; padding: 8px; flex: 1; overflow: hidden; }
+  .panel { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
+  .panel-header { background: rgba(0,0,0,0.25); padding: 6px 10px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .panel-body { padding: 8px; overflow-y: auto; flex: 1; }
+
+  /* Left Panel: Editor & IMEM */
+  textarea { width: 100%; height: 155px; background: var(--bg-card); color: #a5f3fc; border: 1px solid var(--border); border-radius: 4px; padding: 8px; font-family: 'Consolas', monospace; font-size: 12px; resize: none; line-height: 1.4; }
+  .error-box { color: #f87171; font-size: 11px; margin-top: 4px; min-height: 16px; }
+  table { width: 100%; border-collapse: collapse; font-family: 'Consolas', monospace; font-size: 11px; }
+  th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--bg-card); color: var(--text-muted); position: sticky; top: 0; }
+  tr.current-pc { background: var(--pc-row); outline: 1px solid var(--accent); }
+  tr.changed { background: var(--changed-row); transition: background 0.5s; }
+
+  /* Center Panel: Datapath SVG + Decode + Signals + Buffers */
+  .center-col { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+  .svg-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  svg { width: 100%; height: 100%; max-height: 360px; }
+  
+  /* SVG Styles */
+  .hw-block { fill: #1e293b; stroke: #64748b; stroke-width: 1.5; rx: 4; }
+  .hw-buffer { fill: #0f172a; stroke: #38bdf8; stroke-width: 1.5; }
+  .hw-mux { fill: #334155; stroke: #94a3b8; stroke-width: 1.5; }
+  .hw-text { fill: #f8fafc; font-size: 10px; font-weight: bold; text-anchor: middle; pointer-events: none; }
+  .hw-sub { fill: #94a3b8; font-size: 8px; text-anchor: middle; pointer-events: none; }
+  .wire { fill: none; stroke: #475569; stroke-width: 1.8; transition: stroke 0.2s, stroke-width 0.2s; }
+  .wire-ctrl { fill: none; stroke: #475569; stroke-width: 1.2; stroke-dasharray: 3,3; }
+  .wire.active { stroke: var(--active-wire); stroke-width: 3; filter: drop-shadow(0 0 3px rgba(16,185,129,0.8)); }
+  .wire-ctrl.active { stroke: var(--active-ctrl); stroke-width: 2; }
+  .wire-val { fill: #34d399; font-family: monospace; font-size: 9.5px; font-weight: bold; background: #000; }
+
+  /* Bottom Center Info Grid */
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 225px; }
+  .fields-bar { display: flex; gap: 4px; margin-bottom: 6px; }
+  .field-box { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 4px; text-align: center; }
+  .field-box .f-name { font-size: 10px; color: var(--text-muted); }
+  .field-box .f-bits { font-family: monospace; font-size: 11px; color: #38bdf8; font-weight: bold; }
+  .field-box .f-val { font-family: monospace; font-size: 10px; color: #cbd5e1; }
+
+  .signals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .sig-item { background: var(--bg-card); border: 1px solid var(--border); padding: 3px 6px; border-radius: 4px; display: flex; justify-content: space-between; font-family: monospace; font-size: 11px; }
+  .sig-item.on { border-color: var(--active-ctrl); background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+
+  .buffers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-family: monospace; font-size: 10.5px; }
+  .buf-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 5px; }
+  .buf-card h4 { color: var(--accent); font-size: 11px; margin-bottom: 3px; border-bottom: 1px solid #1e293b; }
+
+  /* Right Panel: Registers & Memory */
+  .right-col { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+  .reg-panel { flex: 1.4; }
+  .mem-panel { flex: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚙️ Simulador Microprocesador MIPS (Ruta de Datos Completa)</h1>
+  <div class="controls">
+    <select id="presetSelect" onchange="loadPreset()">
+      <option value="mips101">Programa: MIPS 101 (Suma de Arreglo)</option>
+      <option value="typeR">Prueba Rápida: Tipo R (add, sub, and, or, slt)</option>
+      <option value="typeI">Prueba Rápida: Tipo I (addi, lw, sw, beq)</option>
+      <option value="typeJ">Prueba Rápida: Tipo J (Salto incondicional j)</option>
+    </select>
+    <button onclick="assembleCode()">1. Ensamblar</button>
+    <button class="btn-stage" onclick="stepStage()">2. Avanzar Etapa</button>
+    <button class="btn-inst" onclick="stepInstruction()">3. Avanzar Instrucción</button>
+    <button class="btn-reset" onclick="resetCPU()">Reiniciar</button>
+  </div>
+</header>
+
+<div class="stage-bar">
+  <div class="stages">
+    <div class="stage-pill" id="pill-0">1. IF (Fetch)</div>
+    <div class="stage-pill" id="pill-1">2. ID (Decode)</div>
+    <div class="stage-pill" id="pill-2">3. EX (Execute)</div>
+    <div class="stage-pill" id="pill-3">4. MEM (Memory)</div>
+    <div class="stage-pill" id="pill-4">5. WB (Write-Back)</div>
+  </div>
+  <div class="status-info">
+    <span>PC: <b id="disp-pc">0x00400000</b></span>
+    <span>Bytes Leídos: <b id="disp-bytes">-- -- -- --</b></span>
+    <span>Ciclos: <b id="disp-cycles">0</b></span>
+    <span>Instrucciones: <b id="disp-inst-count">0</b></span>
+  </div>
+</div>
+
+<div class="workspace">
+  <!-- PANEL IZQUIERDO: Editor y Memoria de Instrucciones -->
+  <div class="panel">
+    <div class="panel-header">Editor Ensamblador MIPS</div>
+    <div class="panel-body" style="display:flex; flex-direction:column; gap:8px;">
+      <textarea id="asmEditor" spellcheck="false"></textarea>
+      <div class="error-box" id="asmError"></div>
+      <div class="panel-header" style="margin:0 -8px; border-top:1px solid var(--border);">Memoria de Instrucciones (IMEM)</div>
+      <div style="overflow-y:auto; flex:1;">
+        <table>
+          <thead>
+            <tr><th>Dir (PC)</th><th>Bytes (Hex)</th><th>Instrucción</th></tr>
+          </thead>
+          <tbody id="imemBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL CENTRAL: Ruta de Datos SVG + Campos + Control + Buffers -->
+  <div class="center-col">
+    <div class="svg-container">
+      <svg viewBox="0 0 820 330" id="datapathSvg">
+        <!-- Definición de flechas -->
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+          </marker>
+        </defs>
+
+        <!-- BLOQUES DE HARDWARE -->
+        <!-- PC -->
+        <rect x="20" y="130" width="42" height="70" class="hw-block"/>
+        <text x="41" y="168" class="hw-text">PC</text>
+
+        <!-- Sumador PC+4 -->
+        <rect x="85" y="45" width="45" height="40" class="hw-block"/>
+        <text x="107" y="68" class="hw-text">PC + 4</text>
+
+        <!-- IMEM -->
+        <rect x="95" y="120" width="75" height="90" class="hw-block"/>
+        <text x="132" y="162" class="hw-text">Memoria</text>
+        <text x="132" y="175" class="hw-text">Instruc.</text>
+
+        <!-- Buffer IF/ID -->
+        <rect x="190" y="35" width="14" height="260" class="hw-buffer"/>
+        <text x="197" y="25" class="hw-sub" style="fill:#38bdf8;font-weight:bold;">IF/ID</text>
+
+        <!-- Unidad de Control -->
+        <ellipse cx="285" cy="48" rx="48" ry="22" class="hw-block" style="stroke:#f59e0b;"/>
+        <text x="285" y="51" class="hw-text" style="fill:#fcd34d;">Control</text>
+
+        <!-- Banco de Registros -->
+        <rect x="245" y="110" width="85" height="105" class="hw-block"/>
+        <text x="287" y="158" class="hw-text">Banco de</text>
+        <text x="287" y="171" class="hw-text">Registros</text>
+
+        <!-- Sign Extend -->
+        <rect x="255" y="240" width="65" height="40" class="hw-block"/>
+        <text x="287" y="263" class="hw-text">Sign-Ext</text>
+
+        <!-- Buffer ID/EX -->
+        <rect x="355" y="35" width="14" height="260" class="hw-buffer"/>
+        <text x="362" y="25" class="hw-sub" style="fill:#38bdf8;font-weight:bold;">ID/EX</text>
+
+        <!-- MUX ALUSrc -->
+        <rect x="405" y="175" width="18" height="45" class="hw-mux"/>
+        <text x="414" y="201" class="hw-sub">MUX</text>
+
+        <!-- ALU -->
+        <polygon points="455,115 510,140 510,195 455,220 455,180 470,167 455,155" class="hw-block"/>
+        <text x="488" y="171" class="hw-text">ALU</text>
+
+        <!-- Sumador Branch -->
+        <rect x="455" y="50" width="55" height="40" class="hw-block"/>
+        <text x="482" y="73" class="hw-text">Branch</text>
+
+        <!-- Buffer EX/MEM -->
+        <rect x="540" y="35" width="14" height="260" class="hw-buffer"/>
+        <text x="547" y="25" class="hw-sub" style="fill:#38bdf8;font-weight:bold;">EX/MEM</text>
+
+        <!-- Memoria de Datos -->
+        <rect x="585" y="130" width="80" height="95" class="hw-block"/>
+        <text x="625" y="173" class="hw-text">Memoria</text>
+        <text x="625" y="186" class="hw-text">Datos</text>
+
+        <!-- Buffer MEM/WB -->
+        <rect x="690" y="35" width="14" height="260" class="hw-buffer"/>
+        <text x="697" y="25" class="hw-sub" style="fill:#38bdf8;font-weight:bold;">MEM/WB</text>
+
+        <!-- MUX MemtoReg -->
+        <rect x="735" y="145" width="18" height="48" class="hw-mux"/>
+        <text x="744" y="172" class="hw-sub">MUX</text>
+
+        <!-- CABLES / RUTAS DE DATOS -->
+        <!-- IF -->
+        <path id="w-pc-imem" d="M 62 165 L 95 165" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-pc-add" d="M 75 165 L 75 65 L 85 65" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-add-ifid" d="M 130 65 L 190 65" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-imem-ifid" d="M 170 165 L 190 165" class="wire" marker-end="url(#arrow)"/>
+
+        <!-- ID -->
+        <path id="w-ifid-ctrl" d="M 204 165 L 220 165 L 220 48 L 237 48" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-ifid-regs" d="M 204 165 L 245 165" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-ifid-sign" d="M 220 165 L 220 260 L 255 260" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-regs-idex1" d="M 330 135 L 355 135" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-regs-idex2" d="M 330 185 L 355 185" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-sign-idex" d="M 320 260 L 355 260" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-ctrl-idex" d="M 333 48 L 355 48" class="wire-ctrl" marker-end="url(#arrow)"/>
+
+        <!-- EX -->
+        <path id="w-idex-alu1" d="M 369 135 L 455 135" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-idex-mux" d="M 369 185 L 405 185" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-sign-mux" d="M 369 260 L 390 260 L 390 208 L 405 208" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-mux-alu2" d="M 423 195 L 455 195" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-alu-exmem" d="M 510 167 L 540 167" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-idex-branch" d="M 369 70 L 455 70" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-branch-exmem" d="M 510 70 L 540 70" class="wire" marker-end="url(#arrow)"/>
+
+        <!-- MEM -->
+        <path id="w-exmem-dmem" d="M 554 167 L 585 167" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-exmem-wdata" d="M 568 167 L 568 205 L 585 205" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-dmem-memwb" d="M 665 160 L 690 160" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-exmem-bypass" d="M 554 245 L 690 245" class="wire" marker-end="url(#arrow)"/>
+
+        <!-- WB -->
+        <path id="w-memwb-mux1" d="M 704 160 L 735 160" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-memwb-mux2" d="M 704 245 L 720 245 L 720 182 L 735 182" class="wire" marker-end="url(#arrow)"/>
+        <path id="w-wb-regs" d="M 753 169 L 785 169 L 785 312 L 232 312 L 232 195 L 245 195" class="wire" marker-end="url(#arrow)"/>
+
+        <!-- ETIQUETAS DE VALORES DINÁMICOS SOBRE CABLES -->
+        <text id="lbl-pc" x="41" y="122" class="wire-val" text-anchor="middle"></text>
+        <text id="lbl-rs" x="342" y="128" class="wire-val" text-anchor="middle"></text>
+        <text id="lbl-rt" x="342" y="178" class="wire-val" text-anchor="middle"></text>
+        <text id="lbl-imm" x="342" y="253" class="wire-val" text-anchor="middle"></text>
+        <text id="lbl-alu" x="525" y="158" class="wire-val" text-anchor="middle"></text>
+        <text id="lbl-mem" x="678" y="152" class="wire-val" text-anchor="middle"></text>
+        <text id="lbl-wb" x="510" y="305" class="wire-val" text-anchor="middle"></text>
+      </svg>
+    </div>
+
+    <!-- PANEL INFERIOR CENTRAL: Campos, Señales y Buffers -->
+    <div class="bottom-grid">
+      <!-- Izquierda: Desglose de Instrucción + Señales de Control -->
+      <div class="panel">
+        <div class="panel-header">Campos de Instrucción & Señales de Control <span id="instFormatBadge" style="color:#fcd34d;">--</span></div>
+        <div class="panel-body">
+          <div class="fields-bar" id="fieldsContainer">
+            <div class="field-box"><div class="f-name">Opcode (6)</div><div class="f-bits">000000</div><div class="f-val">0</div></div>
+            <div class="field-box"><div class="f-name">rs (5)</div><div class="f-bits">00000</div><div class="f-val">$0</div></div>
+            <div class="field-box"><div class="f-name">rt (5)</div><div class="f-bits">00000</div><div class="f-val">$0</div></div>
+            <div class="field-box"><div class="f-name">rd (5)</div><div class="f-bits">00000</div><div class="f-val">$0</div></div>
+            <div class="field-box"><div class="f-name">shamt (5)</div><div class="f-bits">00000</div><div class="f-val">0</div></div>
+            <div class="field-box"><div class="f-name">funct (6)</div><div class="f-bits">000000</div><div class="f-val">0</div></div>
+          </div>
+          <div class="signals-grid" id="signalsContainer"></div>
+        </div>
+      </div>
+
+      <!-- Derecha: Buffers Inter-etapa -->
+      <div class="panel">
+        <div class="panel-header">Registros / Buffers Inter-etapa</div>
+        <div class="panel-body">
+          <div class="buffers-grid">
+            <div class="buf-card">
+              <h4>IF / ID</h4>
+              <div id="buf-ifid">PC+4: --<br>Inst: --</div>
+            </div>
+            <div class="buf-card">
+              <h4>ID / EX</h4>
+              <div id="buf-idex">A: -- | B: --<br>Imm: -- | Dest: --</div>
+            </div>
+            <div class="buf-card">
+              <h4>EX / MEM</h4>
+              <div id="buf-exmem">ALU: -- | Zero: --<br>WriteData: --</div>
+            </div>
+            <div class="buf-card">
+              <h4>MEM / WB</h4>
+              <div id="buf-memwb">MemData: --<br>ALURes: -- | Reg: --</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL DERECHO: Registros y Memoria de Datos -->
+  <div class="right-col">
+    <div class="panel reg-panel">
+      <div class="panel-header">Banco de Registros (32)</div>
+      <div class="panel-body" style="padding:0;">
+        <table>
+          <thead><tr><th>Reg</th><th>#</th><th>Hex</th><th>Dec</th></tr></thead>
+          <tbody id="regBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel mem-panel">
+      <div class="panel-header">Memoria de Datos (DMEM)</div>
+      <div class="panel-body" style="padding:0;">
+        <table>
+          <thead><tr><th>Dirección</th><th>Hex</th><th>Dec</th></tr></thead>
+          <tbody id="dmemBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== CONSTANTES Y PRESETS MIPS ====================
+const REG_NAMES = [
+  "$zero","$at","$v0","$v1","$a0","$a1","$a2","$a3",
+  "$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7",
+  "$s0","$s1","$s2","$s3","$s4","$s5","$s6","$s7",
+  "$t8","$t9","$k0","$k1","$gp","$sp","$fp","$ra"
+];
+
+const PRESETS = {
+  mips101: `# MIPS 101: Programa completo (Suma de arreglo en memoria)
+addi $t0, $zero, 0      # i = 0 (desplazamiento en bytes)
+addi $t1, $zero, 16     # límite = 16 bytes (4 enteros)
+addi $s0, $zero, 0      # acumulador suma = 0
+
+# Guardar valores [10, 20, 30, 40] en RAM
+addi $t2, $zero, 10
+sw   $t2, 0($zero)      # Mem[0] = 10
+addi $t2, $zero, 20
+sw   $t2, 4($zero)      # Mem[4] = 20
+addi $t2, $zero, 30
+sw   $t2, 8($zero)      # Mem[8] = 30
+addi $t2, $zero, 40
+sw   $t2, 12($zero)     # Mem[12] = 40
+
+loop:
+beq  $t0, $t1, fin      # si i == 16 salir del bucle
+lw   $t3, 0($t0)        # $t3 = Mem[i]
+add  $s0, $s0, $t3      # suma += $t3
+addi $t0, $t0, 4        # i += 4
+j    loop               # repetir ciclo
+
+fin:
+sw   $s0, 16($zero)     # Mem[16] = 100 (Resultado final)`,
+
+  typeR: `# Operaciones Tipo R (Solo usan Banco de Registros y ALU)
+addi $t1, $zero, 12     # $t1 = 12 (0x0C)
+addi $t2, $zero, 10     # $t2 = 10 (0x0A)
+add  $t3, $t1, $t2      # $t3 = 12 + 10 = 22
+sub  $t4, $t1, $t2      # $t4 = 12 - 10 = 2
+and  $t5, $t1, $t2      # $t5 = 12 & 10 = 8
+or   $t6, $t1, $t2      # $t6 = 12 | 10 = 14
+slt  $t7, $t2, $t1      # $t7 = (10 < 12) ? 1 : 0`,
+
+  typeI: `# Operaciones Tipo I (Inmediatos, Memoria y Branch)
+addi $s1, $zero, 55     # Carga inmediata $s1 = 55
+sw   $s1, 8($zero)      # Guarda 55 en Mem[0x08]
+lw   $s2, 8($zero)      # Lee Mem[0x08] hacia $s2
+beq  $s1, $s2, iguales  # Como 55 == 55, salta
+addi $s3, $zero, 99     # (Se omite por el salto)
+iguales:
+addi $s4, $zero, 1      # Confirma salto exitoso`,
+
+  typeJ: `# Operación Tipo J (Salto Incondicional)
+addi $t0, $zero, 1
+j    salto_directo      # Salta directo a la etiqueta
+addi $t0, $zero, 99     # Instrucción saltada
+salto_directo:
+addi $t1, $zero, 2      # Continúa ejecución aquí`
+};
+
+const BASE_PC = 0x00400000;
+
+// ==================== ESTADO DEL PROCESADOR ====================
+let cpu = {
+  pc: BASE_PC,
+  imem: [],        // { addr, word, hex, bytesStr, asm, line }
+  regs: new Int32Array(32),
+  dmem: new Map(), // addr -> Int32
+  stage: 0,        // 0:IF, 1:ID, 2:EX, 3:MEM, 4:WB
+  cycles: 0,
+  instCount: 0,
+  lastChangedReg: -1,
+  lastChangedMem: -1,
+  halted: false,
+  // Buffers inter-etapa
+  if_id: { pcNext: 0, word: 0, asm: "--" },
+  id_ex: { format: "-", op: 0, rs: 0, rt: 0, rd: 0, shamt: 0, funct: 0, imm: 0, target: 0, valA: 0, valB: 0, ctrl: {}, asm: "--" },
+  ex_mem: { aluRes: 0, zero: 0, valB: 0, writeReg: 0, branchTaken: false, nextPC: 0, ctrl: {} },
+  mem_wb: { memData: 0, aluRes: 0, writeReg: 0, ctrl: {} }
+};
+
+// ==================== ENSAMBLADOR MIPS ====================
+function parseReg(str) {
+  str = str.trim().replace(",", "");
+  if (REG_NAMES.includes(str)) return REG_NAMES.indexOf(str);
+  if (str.startsWith("$")) {
+    const n = parseInt(str.slice(1));
+    if (!isNaN(n) && n >= 0 && n < 32) return n;
+  }
+  throw new Error(`Registro inválido: ${str}`);
+}
+
+function assembleCode() {
+  const rawLines = document.getElementById("asmEditor").value.split("
+");
+  const errorBox = document.getElementById("asmError");
+  errorBox.textContent = "";
+
+  const labels = {};
+  const cleanInsts = [];
+
+  // Pasada 1: Etiquetas
+  rawLines.forEach((raw, idx) => {
+    let line = raw.split("#")[0].trim();
+    if (!line) return;
+    if (line.includes(":")) {
+      const parts = line.split(":");
+      const lbl = parts[0].trim();
+      labels[lbl] = BASE_PC + cleanInsts.length * 4;
+      line = parts[1].trim();
+    }
+    if (line) cleanInsts.push({ text: line, lineNum: idx + 1 });
+  });
+
+  // Pasada 2: Codificación a 32 bits
+  const program = [];
+  try {
+    cleanInsts.forEach((item, idx) => {
+      const addr = BASE_PC + idx * 4;
+      const tokens = item.text.replace(/,/g, " ").replace(/\(/g, " ").replace(/\)/g, " ").trim().split(/\s+/);
+      const op = tokens[0].toLowerCase();
+      let word = 0;
+
+      const rTypeFunct = { add: 0x20, sub: 0x22, and: 0x24, or: 0x25, slt: 0x2A };
+      if (rTypeFunct[op] !== undefined) {
+        const rd = parseReg(tokens[1]);
+        const rs = parseReg(tokens[2]);
+        const rt = parseReg(tokens[3]);
+        word = (0 << 26) | (rs << 21) | (rt << 16) | (rd << 11) | (0 << 6) | rTypeFunct[op];
+      } else if (op === "addi") {
+        const rt = parseReg(tokens[1]);
+        const rs = parseReg(tokens[2]);
+        const imm = parseInt(tokens[3]) & 0xFFFF;
+        word = (0x08 << 26) | (rs << 21) | (rt << 16) | imm;
+      } else if (op === "lw" || op === "sw") {
+        const opcode = op === "lw" ? 0x23 : 0x2B;
+        const rt = parseReg(tokens[1]);
+        const offset = parseInt(tokens[2]) & 0xFFFF;
+        const rs = parseReg(tokens[3]);
+        word = (opcode << 26) | (rs << 21) | (rt << 16) | offset;
+      } else if (op === "beq") {
+        const rs = parseReg(tokens[1]);
+        const rt = parseReg(tokens[2]);
+        const targetAddr = labels[tokens[3]] !== undefined ? labels[tokens[3]] : parseInt(tokens[3]);
+        if (isNaN(targetAddr)) throw new Error(`Etiqueta no encontrada: ${tokens[3]}`);
+        const offset = ((targetAddr - (addr + 4)) >> 2) & 0xFFFF;
+        word = (0x04 << 26) | (rs << 21) | (rt << 16) | offset;
+      } else if (op === "j") {
+        const targetAddr = labels[tokens[1]] !== undefined ? labels[tokens[1]] : parseInt(tokens[1]);
+        if (isNaN(targetAddr)) throw new Error(`Etiqueta no encontrada: ${tokens[1]}`);
+        const target26 = (targetAddr >>> 2) & 0x03FFFFFF;
+        word = (0x02 << 26) | target26;
+      } else {
+        throw new Error(`Instrucción no soportada: ${op}`);
+      }
+
+      word = word >>> 0;
+      const b0 = ((word >>> 24) & 0xFF).toString(16).padStart(2, "0").toUpperCase();
+      const b1 = ((word >>> 16) & 0xFF).toString(16).padStart(2, "0").toUpperCase();
+      const b2 = ((word >>> 8) & 0xFF).toString(16).padStart(2, "0").toUpperCase();
+      const b3 = (word & 0xFF).toString(16).padStart(2, "0").toUpperCase();
+
+      program.push({
+        addr,
+        word,
+        hex: "0x" + word.toString(16).padStart(8, "0").toUpperCase(),
+        bytesStr: `${b0} ${b1} ${b2} ${b3}`,
+        asm: item.text
+      });
+    });
+
+    cpu.imem = program;
+    resetCPU();
+  } catch (e) {
+    errorBox.textContent = "Error de ensamblado: " + e.message;
+  }
+}
+
+// ==================== UNIDAD DE CONTROL ====================
+function getControlSignals(opcode, funct) {
+  let ctrl = { RegDst: 0, ALUSrc: 0, MemtoReg: 0, RegWrite: 0, MemRead: 0, MemWrite: 0, Branch: 0, Jump: 0, ALUOp: "00" };
+  if (opcode === 0x00) { // Tipo R
+    ctrl.RegDst = 1; ctrl.RegWrite = 1; ctrl.ALUOp = "10";
+  } else if (opcode === 0x08) { // addi
+    ctrl.ALUSrc = 1; ctrl.RegWrite = 1; ctrl.ALUOp = "00";
+  } else if (opcode === 0x23) { // lw
+    ctrl.ALUSrc = 1; ctrl.MemtoReg = 1; ctrl.RegWrite = 1; ctrl.MemRead = 1; ctrl.ALUOp = "00";
+  } else if (opcode === 0x2B) { // sw
+    ctrl.ALUSrc = 1; ctrl.MemWrite = 1; ctrl.ALUOp = "00";
+  } else if (opcode === 0x04) { // beq
+    ctrl.Branch = 1; ctrl.ALUOp = "01";
+  } else if (opcode === 0x02) { // j
+    ctrl.Jump = 1;
+  }
+  return ctrl;
+}
+
+// ==================== EJECUCIÓN POR ETAPA ====================
+function stepStage() {
+  if (cpu.imem.length === 0) return;
+  const instIndex = (cpu.pc - BASE_PC) / 4;
+
+  // Verificar fin de programa en etapa IF
+  if (cpu.stage === 0 && (instIndex < 0 || instIndex >= cpu.imem.length)) {
+    cpu.halted = true;
+    document.getElementById("asmError").textContent = "✔ Ejecución del programa finalizada.";
+    return;
+  }
+  cpu.halted = false;
+  cpu.lastChangedReg = -1;
+  cpu.lastChangedMem = -1;
+
+  if (cpu.stage === 0) {
+    // --- ETAPA 1: IF (Instruction Fetch) ---
+    const inst = cpu.imem[instIndex];
+    cpu.if_id = {
+      pcNext: cpu.pc + 4,
+      word: inst.word,
+      bytesStr: inst.bytesStr,
+      asm: inst.asm
+    };
+    cpu.cycles++;
+    highlightDatapath(0);
+    cpu.stage = 1;
+
+  } else if (cpu.stage === 1) {
+    // --- ETAPA 2: ID (Instruction Decode & Register Fetch) ---
+    const w = cpu.if_id.word;
+    const op = (w >>> 26) & 0x3F;
+    const rs = (w >>> 21) & 0x1F;
+    const rt = (w >>> 16) & 0x1F;
+    const rd = (w >>> 11) & 0x1F;
+    const shamt = (w >>> 6) & 0x1F;
+    const funct = w & 0x3F;
+    const imm16 = w & 0xFFFF;
+    const immSigned = (imm16 & 0x8000) ? (imm16 | 0xFFFF0000) : imm16;
+    const target26 = w & 0x03FFFFFF;
+
+    let format = "I";
+    if (op === 0) format = "R";
+    else if (op === 2) format = "J";
+
+    const ctrl = getControlSignals(op, funct);
+    cpu.id_ex = {
+      format, op, rs, rt, rd, shamt, funct,
+      imm: immSigned,
+      imm16,
+      target: target26,
+      valA: cpu.regs[rs],
+      valB: cpu.regs[rt],
+      ctrl,
+      asm: cpu.if_id.asm
+    };
+    cpu.cycles++;
+    highlightDatapath(1);
+    cpu.stage = 2;
+
+  } else if (cpu.stage === 2) {
+    // --- ETAPA 3: EX (Execute / ALU) ---
+    const d = cpu.id_ex;
+    const op2 = d.ctrl.ALUSrc ? d.imm : d.valB;
+    let aluRes = 0;
+
+    if (d.ctrl.ALUOp === "00") {
+      aluRes = (d.valA + op2) | 0;
+    } else if (d.ctrl.ALUOp === "01") {
+      aluRes = (d.valA - op2) | 0;
+    } else if (d.ctrl.ALUOp === "10") {
+      if (d.funct === 0x20) aluRes = (d.valA + op2) | 0;       // add
+      else if (d.funct === 0x22) aluRes = (d.valA - op2) | 0;  // sub
+      else if (d.funct === 0x24) aluRes = d.valA & op2;        // and
+      else if (d.funct === 0x25) aluRes = d.valA | op2;        // or
+      else if (d.funct === 0x2A) aluRes = (d.valA < op2) ? 1 : 0; // slt
+    }
+
+    const zero = (aluRes === 0) ? 1 : 0;
+    const writeReg = d.ctrl.RegDst ? d.rd : d.rt;
+    const branchTarget = cpu.if_id.pcNext + (d.imm << 2);
+    const jumpTarget = (cpu.if_id.pcNext & 0xF0000000) | (d.target << 2);
+
+    let nextPC = cpu.if_id.pcNext;
+    let branchTaken = false;
+    if (d.ctrl.Jump) {
+      nextPC = jumpTarget;
+      branchTaken = true;
+    } else if (d.ctrl.Branch && zero === 1) {
+      nextPC = branchTarget;
+      branchTaken = true;
+    }
+
+    cpu.ex_mem = {
+      aluRes, zero, valB: d.valB, writeReg, branchTaken, nextPC, ctrl: d.ctrl
+    };
+    cpu.cycles++;
+    highlightDatapath(2);
+    cpu.stage = 3;
+
+  } else if (cpu.stage === 3) {
+    // --- ETAPA 4: MEM (Memory Access) ---
+    const ex = cpu.ex_mem;
+    let memData = 0;
+
+    if (ex.ctrl.MemRead) {
+      memData = cpu.dmem.get(ex.aluRes) || 0;
+    }
+    if (ex.ctrl.MemWrite) {
+      cpu.dmem.set(ex.aluRes, ex.valB);
+      cpu.lastChangedMem = ex.aluRes;
+    }
+
+    cpu.mem_wb = {
+      memData, aluRes: ex.aluRes, writeReg: ex.writeReg, ctrl: ex.ctrl
+    };
+    cpu.cycles++;
+    highlightDatapath(3);
+    cpu.stage = 4;
+
+  } else if (cpu.stage === 4) {
+    // --- ETAPA 5: WB (Write-Back) & Actualización de PC ---
+    const wb = cpu.mem_wb;
+    if (wb.ctrl.RegWrite && wb.writeReg !== 0) {
+      const finalVal = wb.ctrl.MemtoReg ? wb.memData : wb.aluRes;
+      cpu.regs[wb.writeReg] = finalVal;
+      cpu.lastChangedReg = wb.writeReg;
+    }
+    cpu.regs[0] = 0; // $zero inmutable
+    cpu.pc = cpu.ex_mem.nextPC;
+    cpu.instCount++;
+    cpu.cycles++;
+    highlightDatapath(4);
+    cpu.stage = 0;
+  }
+
+  updateUI();
+}
+
+function stepInstruction() {
+  if (cpu.imem.length === 0) return;
+  do {
+    stepStage();
+  } while (cpu.stage !== 0 && !cpu.halted);
+}
+
+function resetCPU() {
+  cpu.pc = BASE_PC;
+  cpu.regs.fill(0);
+  cpu.dmem.clear();
+  // Inicializar 8 palabras en RAM en 0 para visualización clara
+  for (let i = 0; i <= 24; i += 4) cpu.dmem.set(i, 0);
+  cpu.stage = 0;
+  cpu.cycles = 0;
+  cpu.instCount = 0;
+  cpu.lastChangedReg = -1;
+  cpu.lastChangedMem = -1;
+  cpu.halted = false;
+  cpu.if_id = { pcNext: 0, word: 0, bytesStr: "-- -- -- --", asm: "--" };
+  cpu.id_ex = { format: "-", op: 0, rs: 0, rt: 0, rd: 0, shamt: 0, funct: 0, imm: 0, imm16: 0, target: 0, valA: 0, valB: 0, ctrl: {}, asm: "--" };
+  cpu.ex_mem = { aluRes: 0, zero: 0, valB: 0, writeReg: 0, branchTaken: false, nextPC: BASE_PC, ctrl: {} };
+  cpu.mem_wb = { memData: 0, aluRes: 0, writeReg: 0, ctrl: {} };
+  document.getElementById("asmError").textContent = "";
+  highlightDatapath(-1);
+  updateUI();
+}
+
+// ==================== ACTUALIZACIÓN VISUAL ====================
+function toHex32(num) {
+  return "0x" + (num >>> 0).toString(16).padStart(8, "0").toUpperCase();
+}
+
+function highlightDatapath(stage) {
+  document.querySelectorAll(".wire, .wire-ctrl").forEach(w => {
+    w.classList.remove("active");
+    if (w.getAttribute("marker-end")) w.setAttribute("marker-end", "url(#arrow)");
+  });
+  document.querySelectorAll(".wire-val").forEach(t => t.textContent = "");
+
+  const activate = (ids) => {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("active");
+        if (el.getAttribute("marker-end")) el.setAttribute("marker-end", "url(#arrow-active)");
+      }
+    });
+  };
+
+  if (stage === 0) { // IF
+    activate(["w-pc-imem", "w-pc-add", "w-add-ifid", "w-imem-ifid"]);
+    document.getElementById("lbl-pc").textContent = toHex32(cpu.pc);
+  } else if (stage === 1) { // ID
+    activate(["w-ifid-ctrl", "w-ifid-regs", "w-ifid-sign", "w-regs-idex1", "w-regs-idex2", "w-sign-idex", "w-ctrl-idex"]);
+    document.getElementById("lbl-rs").textContent = cpu.id_ex.valA;
+    document.getElementById("lbl-rt").textContent = cpu.id_ex.valB;
+    document.getElementById("lbl-imm").textContent = cpu.id_ex.imm;
+  } else if (stage === 2) { // EX
+    const wires = ["w-idex-alu1", "w-alu-exmem"];
+    if (cpu.id_ex.ctrl.ALUSrc) wires.push("w-sign-mux", "w-mux-alu2");
+    else wires.push("w-idex-mux", "w-mux-alu2");
+    if (cpu.id_ex.ctrl.Branch) wires.push("w-idex-branch", "w-branch-exmem");
+    activate(wires);
+    document.getElementById("lbl-alu").textContent = cpu.ex_mem.aluRes;
+  } else if (stage === 3) { // MEM
+    const wires = [];
+    if (cpu.ex_mem.ctrl.MemRead) { wires.push("w-exmem-dmem", "w-dmem-memwb"); document.getElementById("lbl-mem").textContent = cpu.mem_wb.memData; }
+    else if (cpu.ex_mem.ctrl.MemWrite) { wires.push("w-exmem-dmem", "w-exmem-wdata"); }
+    else { wires.push("w-exmem-bypass"); }
+    activate(wires);
+  } else if (stage === 4) { // WB
+    if (cpu.mem_wb.ctrl.RegWrite) {
+      const wires = ["w-wb-regs"];
+      wires.push(cpu.mem_wb.ctrl.MemtoReg ? "w-memwb-mux1" : "w-memwb-mux2");
+      activate(wires);
+      const val = cpu.mem_wb.ctrl.MemtoReg ? cpu.mem_wb.memData : cpu.mem_wb.aluRes;
+      document.getElementById("lbl-wb").textContent = `${REG_NAMES[cpu.mem_wb.writeReg]} = ${val}`;
+    }
+  }
+}
+
+function updateUI() {
+  // Píldoras de etapa
+  for (let i = 0; i < 5; i++) {
+    const pill = document.getElementById(`pill-${i}`);
+    // Resaltar la etapa que acaba de ejecutarse
+    const activeIdx = (cpu.stage === 0 && cpu.cycles > 0) ? 4 : cpu.stage - 1;
+    pill.classList.toggle("active", i === activeIdx);
+  }
+
+  document.getElementById("disp-pc").textContent = toHex32(cpu.pc);
+  document.getElementById("disp-bytes").textContent = cpu.if_id.bytesStr || "-- -- -- --";
+  document.getElementById("disp-cycles").textContent = cpu.cycles;
+  document.getElementById("disp-inst-count").textContent = cpu.instCount;
+
+  // Tabla IMEM
+  const imemBody = document.getElementById("imemBody");
+  imemBody.innerHTML = cpu.imem.map(inst => `
+    <tr class="${inst.addr === cpu.pc ? 'current-pc' : ''}">
+      <td>${toHex32(inst.addr)}</td>
+      <td>${inst.bytesStr}</td>
+      <td>${inst.asm}</td>
+    </tr>
+  `).join("");
+
+  // Campos de Instrucción
+  const d = cpu.id_ex;
+  document.getElementById("instFormatBadge").textContent = d.format !== "-" ? `Formato Tipo ${d.format}` : "--";
+  const fCont = document.getElementById("fieldsContainer");
+  if (d.format === "R") {
+    fCont.innerHTML = `
+      <div class="field-box"><div class="f-name">op(6)</div><div class="f-bits">${d.op.toString(2).padStart(6,'0')}</div><div class="f-val">${d.op}</div></div>
+      <div class="field-box"><div class="f-name">rs(5)</div><div class="f-bits">${d.rs.toString(2).padStart(5,'0')}</div><div class="f-val">${REG_NAMES[d.rs]}</div></div>
+      <div class="field-box"><div class="f-name">rt(5)</div><div class="f-bits">${d.rt.toString(2).padStart(5,'0')}</div><div class="f-val">${REG_NAMES[d.rt]}</div></div>
+      <div class="field-box"><div class="f-name">rd(5)</div><div class="f-bits">${d.rd.toString(2).padStart(5,'0')}</div><div class="f-val">${REG_NAMES[d.rd]}</div></div>
+      <div class="field-box"><div class="f-name">shamt(5)</div><div class="f-bits">${d.shamt.toString(2).padStart(5,'0')}</div><div class="f-val">${d.shamt}</div></div>
+      <div class="field-box"><div class="f-name">funct(6)</div><div class="f-bits">${d.funct.toString(2).padStart(6,'0')}</div><div class="f-val">0x${d.funct.toString(16)}</div></div>
+    `;
+  } else if (d.format === "I") {
+    fCont.innerHTML = `
+      <div class="field-box"><div class="f-name">op(6)</div><div class="f-bits">${d.op.toString(2).padStart(6,'0')}</div><div class="f-val">0x${d.op.toString(16)}</div></div>
+      <div class="field-box"><div class="f-name">rs(5)</div><div class="f-bits">${d.rs.toString(2).padStart(5,'0')}</div><div class="f-val">${REG_NAMES[d.rs]}</div></div>
+      <div class="field-box"><div class="f-name">rt(5)</div><div class="f-bits">${d.rt.toString(2).padStart(5,'0')}</div><div class="f-val">${REG_NAMES[d.rt]}</div></div>
+      <div class="field-box" style="flex:2;"><div class="f-name">immediate (16 bits)</div><div class="f-bits">${(d.imm16||0).toString(2).padStart(16,'0')}</div><div class="f-val">${d.imm}</div></div>
+    `;
+  } else if (d.format === "J") {
+    fCont.innerHTML = `
+      <div class="field-box"><div class="f-name">op(6)</div><div class="f-bits">${d.op.toString(2).padStart(6,'0')}</div><div class="f-val">0x${d.op.toString(16)}</div></div>
+      <div class="field-box" style="flex:4;"><div class="f-name">address (26 bits)</div><div class="f-bits">${(d.target||0).toString(2).padStart(26,'0')}</div><div class="f-val">0x${(d.target<<2).toString(16)}</div></div>
+    `;
+  }
+
+  // Señales de Control
+  const sigNames = ["RegDst","ALUSrc","MemtoReg","RegWrite","MemRead","MemWrite","Branch","Jump","ALUOp"];
+  document.getElementById("signalsContainer").innerHTML = sigNames.map(s => {
+    const val = d.ctrl[s] !== undefined ? d.ctrl[s] : 0;
+    const isOn = (val === 1 || (s === "ALUOp" && val !== "00"));
+    return `<div class="sig-item ${isOn ? 'on' : ''}"><span>${s}</span><b>${val}</b></div>`;
+  }).join("");
+
+  // Buffers
+  document.getElementById("buf-ifid").innerHTML = `PC+4: ${toHex32(cpu.if_id.pcNext)}<br>Inst: ${cpu.if_id.asm}`;
+  document.getElementById("buf-idex").innerHTML = `A: ${d.valA} | B: ${d.valB}<br>Imm: ${d.imm} | Dest: ${REG_NAMES[d.ctrl.RegDst ? d.rd : d.rt] || '--'}`;
+  document.getElementById("buf-exmem").innerHTML = `ALU: ${cpu.ex_mem.aluRes} | Zero: ${cpu.ex_mem.zero}<br>WData: ${cpu.ex_mem.valB}`;
+  document.getElementById("buf-memwb").innerHTML = `MemData: ${cpu.mem_wb.memData}<br>ALURes: ${cpu.mem_wb.aluRes} | Reg: ${REG_NAMES[cpu.mem_wb.writeReg] || '--'}`;
+
+  // Tabla de Registros
+  const regBody = document.getElementById("regBody");
+  regBody.innerHTML = Array.from(cpu.regs).map((val, idx) => `
+    <tr class="${idx === cpu.lastChangedReg ? 'changed' : ''}">
+      <td><b>${REG_NAMES[idx]}</b></td>
+      <td>$${idx}</td>
+      <td>${toHex32(val)}</td>
+      <td>${val}</td>
+    </tr>
+  `).join("");
+
+  // Tabla Memoria de Datos
+  const dmemBody = document.getElementById("dmemBody");
+  const sortedAddrs = Array.from(cpu.dmem.keys()).sort((a,b) => a - b);
+  dmemBody.innerHTML = sortedAddrs.map(addr => {
+    const val = cpu.dmem.get(addr);
+    return `
+      <tr class="${addr === cpu.lastChangedMem ? 'changed' : ''}">
+        <td>${toHex32(addr)}</td>
+        <td>${toHex32(val)}</td>
+        <td>${val}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function loadPreset() {
+  const key = document.getElementById("presetSelect").value;
+  document.getElementById("asmEditor").value = PRESETS[key];
+  assembleCode();
+}
+
+// Inicialización al cargar
+window.onload = () => {
+  loadPreset();
+};
+</script>
+</body>
+</html>

@@ -286,6 +286,7 @@ body {
   border-radius: 6px;
   text-decoration: none;
   transition: all 0.2s ease;
+  align-self: center;       /* Alinea el botón al inicio del contenedor */
 }
 
 /* Efecto Hover para el Botón Secundario */
@@ -300,4 +301,202 @@ body {
   display: flex;
   justify-content: flex-start;
   margin-top: 0.75rem;
+}
+
+/* --- POP-UP / MODAL DE MINI DIAPOSITIVAS --- */
+dialog.slide-modal {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #334155;
+  width: 90%;
+  max-width: 560px;
+  padding: 0;
+  margin: auto; /* Centra el diálogo en pantalla */
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.25);
+  animation: modalZoom 0.22s ease-out;
+}
+
+/* Fondo difuminado oscuro detrás de la diapositiva */
+dialog.slide-modal::backdrop {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(3px);
+}
+
+@keyframes modalZoom {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Encabezado igual a tus tarjetas */
+.slide-modal-header {
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slide-modal-header h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.btn-close-modal {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-close-modal:hover {
+  color: #38bdf8;
+}
+
+/* Contenido de cada diapositiva */
+.slide-modal-body {
+  padding: 2rem 1.5rem;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.slide-item {
+  display: none;
+}
+
+.slide-item.active {
+  display: block;
+  animation: slideFade 0.25s ease;
+}
+
+.slide-item h4 {
+  color: #0f172a;
+  font-size: 1.15rem;
+  margin-bottom: 0.6rem;
+}
+
+@keyframes slideFade {
+  from { opacity: 0.3; transform: translateX(6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Pie con botones Anterior / Siguiente */
+.slide-modal-footer {
+  background-color: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slide-counter {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.btn-slide-nav {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-slide-nav:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-slide-nav:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+dialog.conclusion-modal {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  width: 90%;
+  max-width: 550px;
+  padding: 2rem;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+dialog.conclusion-modal::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.btn-cerrar-x {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.conclusion-modal h2 {
+  color: #0f172a;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #2563eb;
+}
+
+.conclusion-contenido {
+  min-height: 190px; /* Mantiene fijo el tamaño del cuadro al navegar */
+  padding: 0.5rem 0;
+}
+
+.conclusion-contenido h4 {
+  color: #2563eb;
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.conclusion-contenido p {
+  color: #334155;
+  line-height: 1.65;
+  margin-bottom: 1rem; /* Separación clara entre párrafos */
+  text-align: justify;
+}
+
+.conclusion-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.btn-nav-conc {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-nav-conc:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
 }
